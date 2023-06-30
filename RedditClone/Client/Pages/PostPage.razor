@@ -1,5 +1,6 @@
 ﻿@inherits BaseElement
 
+@inject IBoardService BoardService
 @inject IPostService PostService
 @inject ICommentService CommentService
 @inject IUserService UserService
@@ -10,30 +11,71 @@
 
 @if(_postExists)
 {
-    <div class="d-flex mb-3">
-        <div class="d-flex align-items-center">
-            <div class="d-inline-flex flex-column">
-                <div class="fs-6 align-self-center"><span class="oi oi-chevron-top"></span></div>
-                <div class="fs-3 align-self-center">@_points</div>
-                <div class="fs-6"><span class="oi oi-chevron-bottom"></span></div>
-            </div>
-            <div class="d-inline-flex mx-3">
-                <span class="border border-1 border-dark rounded-circle oi oi-copywriting fs-2 p-3"></span>
-            </div>
-        </div>
-        <div class="d-flex flex-column flex-fill">
-            <div class="">
-                <div class="d-inline me-1 badge bg-secondary">tag</div>
-                <div class="d-inline"><a href="#" class="fs-4 text-decoration-none">@_post.Title</a></div>
-            </div>
-            <div class="">
-                <p class="fs-6">Submitted <span title="@_post.DatePosted">@Utils.FormatTime(_post.DatePosted)</span> by <a href="/u/@_author.Username">@_author.Username</a></p>
+    if(string.IsNullOrEmpty(_post.Title))
+    {
+        <div class="d-flex mb-3">
+            <div class="d-flex align-items-center">
+                <div class="d-inline-flex flex-column">
+                    <div class="fs-6 align-self-center"><span class="oi oi-chevron-top"></span></div>
+                    <div class="fs-3 align-self-center">@_points</div>
+                    <div class="fs-6"><span class="oi oi-chevron-bottom"></span></div>
                 </div>
-            <div class="border border-dark border-1 rounded-2 p-2">
-                @_post.Content
+                <div class="d-inline-flex mx-3">
+                    <span class="border border-1 border-dark rounded-circle oi oi-copywriting fs-2 p-3"></span>
+                </div>
+            </div>
+            <div class="d-flex flex-column flex-fill">
+                <div class="">
+                    <div class="d-inline">
+                        <p class="fs-4 placeholder-glow">
+                            <span class="placeholder col-2"></span> <span class="placeholder col-1"></span> <span class="placeholder col-1"></span> <span class="placeholder col-3"></span>
+                        </p>
+                    </div>
+                </div>
+                <div class="">
+                    <p class="fs-6"><span class="placeholder col-3"></span> <span class="placeholder col-2"></span> <span class="placeholder col-1"></span> <span class="placeholder col-3"></span></p>
+                    </div>
+                <div class="border border-dark border-1 rounded-2 p-2">
+                    <p class="placeholder-glow">
+                        <span class="placeholder col-2"></span> <span class="placeholder col-4"></span> <span class="placeholder col-1"></span> <span class="placeholder col-5"></span>
+                        <span class="placeholder col-3"></span> <span class="placeholder col-2"></span> <span class="placeholder col-4"></span> <span class="placeholder col-1"></span>
+                        <span class="placeholder col-3"></span> <span class="placeholder col-2"></span> <span class="placeholder col-4"></span> <span class="placeholder col-1"></span>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="d-flex mb-3">
+            <div class="d-flex align-items-center">
+                <div class="d-inline-flex flex-column">
+                    <div class="fs-6 align-self-center"><span class="oi oi-chevron-top"></span></div>
+                    <div class="fs-3 align-self-center">@_points</div>
+                    <div class="fs-6"><span class="oi oi-chevron-bottom"></span></div>
+                </div>
+                <div class="d-inline-flex mx-3">
+                    <span class="border border-1 border-dark rounded-circle oi oi-copywriting fs-2 p-3"></span>
+                </div>
+            </div>
+            <div class="d-flex flex-column flex-fill">
+                <div class="">
+                    <div class="d-inline me-1 badge bg-secondary">tag</div>
+                    <div class="d-inline"><a href="#" class="fs-4 text-decoration-none">@_post.Title</a></div>
+                </div>
+                <div class="">
+                    <p class="fs-6">Submitted <span title="@_post.DatePosted">@Utils.FormatTime(_post.DatePosted)</span> by <a href="/u/@_author.Username">@_author.Username</a></p>
+                </div>
+                @if(!string.IsNullOrEmpty(_post.Content))
+                {
+                    <div class="border border-dark border-1 rounded-2 p-2">
+                        @_post.Content
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    
 
     <div class="border-bottom border-1 border-secondary">
         <span class="fs-4">all @_commentCount comments</span>
@@ -76,6 +118,8 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
     [Parameter]
     public string BoardName { get; set; }
     [Parameter]
@@ -95,6 +139,16 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        var getBoard = await BoardService.GetBoardByNameAsync(BoardName);
+        if(getBoard != null && getBoard.Success && getBoard.Data != null)
+        {
+            _board = getBoard.Data;
+            if (Layout.CurrentBoard.Guid != _board.Guid)
+            {
+                Layout.CurrentBoard = _board;
+            }
+        }
+
         var getPost = await PostService.GetPostByHashIdAsync(PostHash);
         if (getPost != null && getPost.Success && getPost.Data != null)
         {

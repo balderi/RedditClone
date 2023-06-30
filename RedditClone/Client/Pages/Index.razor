@@ -9,7 +9,7 @@
 {
     if(string.IsNullOrEmpty(_message))
     {
-        <p>Loading...</p>
+        <p>Loadering...</p>
     }
     else
     {
@@ -38,6 +38,9 @@ else
 </AuthorizeView>
 
 @code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
+
     List<Board> _boards;
     string _message = string.Empty;
     bool _newBoard = false;
@@ -45,6 +48,11 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        if(Layout.CurrentBoard != null)
+        {
+            Layout.CurrentBoard = null;
+        }
+
         var getBoards = await BoardService.GetBoardsAsync();
         if(getBoards != null)
         {

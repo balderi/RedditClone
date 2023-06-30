@@ -28,6 +28,9 @@ else
 
 
 @code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
+
     [Parameter]
     public string UserName { get; set; }
 
@@ -39,6 +42,11 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        if (Layout.CurrentBoard != null)
+        {
+            Layout.CurrentBoard = null;
+        }
+
         var getUser = await UserService.GetUserByNameAsync(UserName);
         if(getUser != null && getUser.Success && getUser.Data != null)
         {

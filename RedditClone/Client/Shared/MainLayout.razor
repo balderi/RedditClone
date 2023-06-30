@@ -3,29 +3,50 @@
 @inject NavigationManager NavigationManager
 @inherits LayoutComponentBase
 
-<div class="page">
-    <main>
-        <div class="top-row px-4">
-            <a class="align-self-start me-auto ms-0" href="/"><h1>Title</h1></a>
-            <AuthorizeView>
-                <Authorized>
-                    <a href="/profile" class="btn btn-primary">@context.User.Identity.Name</a>
-                    <button class="btn btn-outline-danger mx-3" @onclick="Logout">Logout</button>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="/login?returnUrl=@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)" class="btn btn-primary">Login</a> 
-                    <a href="/register" class="btn btn-outline-primary">Register</a> 
-                </NotAuthorized>
-            </AuthorizeView>
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+<CascadingValue Value="this">
+    <div class="page">
+        <main>
+            <div class="top-row px-4">
+                <span class="d-flex align-self-start me-auto ms-0">
+                    <a class="d-inline-flex align-items-end ms-0" href="/"><h1 class="m-0 p-0 align-bottom">Title</h1></a>
+                    @if(_currentBoard != null)
+                    {
+                        <a class="d-inline-flex align-items-end" href="/b/@_currentBoard.Name"><h2 class="m-0 p-0 fs-6 fw-bold">@_currentBoard.Name</h2></a>
+                    }
+                </span>
+                <AuthorizeView>
+                    <Authorized>
+                        <a href="/profile" class="btn btn-primary">@context.User.Identity.Name</a>
+                        <button class="btn btn-outline-danger mx-3" @onclick="Logout">Logout</button>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/login?returnUrl=@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)" class="btn btn-primary">Login</a> 
+                        <a href="/register" class="btn btn-outline-primary">Register</a> 
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+</CascadingValue>
+
+
 @code {
+    private Board? _currentBoard;
+
+    public Board? CurrentBoard
+    {
+        get => _currentBoard;
+        set
+        {
+            _currentBoard = value;
+            InvokeAsync(() => StateHasChanged());
+        }
+    }
+
     private async Task Logout()
     {
         await LocalStorage.RemoveItemAsync("authToken");

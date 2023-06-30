@@ -20,9 +20,9 @@
 }
 else
 {
-    <div class="d-flex">
-        <div class="d-flex flex-column h-100 align-middle m-2">#</div>
-        <div class="d-flex flex-column h-100 align-middle m-2">ICO</div>
+    <div class="d-flex align-items-center">
+        <div class="d-flex flex-column h-100 m-2">@Number</div>
+        <div class="d-flex flex-column h-100 m-2"><span class="border border-1 border-dark rounded-circle oi oi-copywriting fs-4 p-3"></span></div>
         <div class="d-flex flex-column h-100 m-2">
             <div class="d-flex align-top"><a href="@_link">@Post.Title</a> <span class="ms-3 badge bg-secondary">Tag</span></div>
             <div class="d-flex align-bottom">
@@ -52,6 +52,8 @@ else
 @code {
     [Parameter]
     public Post Post { get; set; } = new();
+    [Parameter]
+    public int Number { get; set; }
     int _commentCount;
     string _link = string.Empty;
     string _commentLink = string.Empty;

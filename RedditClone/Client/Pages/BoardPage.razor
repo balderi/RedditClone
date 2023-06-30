@@ -6,17 +6,17 @@
 
 @if(_boardExists)
 {
-    <h3>@BoardName</h3>
-    <hr />
+    <PageTitle>@BoardName</PageTitle>
     @if(_posts == null)
     {
         <p>Loading...</p>
     }
     else
     {
+        int i = 0;
         @foreach (var p in _posts)
         {
-            <PostElement Post="p"></PostElement>
+            <PostElement Number="++i" Post="p"></PostElement>
         }
     }
     <AuthorizeView>
@@ -40,6 +40,8 @@ else
 
 
 @code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
     [Parameter]
     public string BoardName { get; set; }
 
@@ -55,6 +57,10 @@ else
         if(getBoard != null && getBoard.Success && getBoard.Data != null)
         {
             _board = getBoard.Data;
+            if (Layout.CurrentBoard.Guid != _board.Guid)
+            {
+                Layout.CurrentBoard = _board;
+            }
 
             var getPosts = await PostService.GetPostsByBoardGuidAsync(_board.Guid);
             if (getPosts != null && getPosts.Success && getPosts.Data != null)
