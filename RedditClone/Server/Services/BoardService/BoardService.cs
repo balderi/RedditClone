@@ -1,0 +1,79 @@
+﻿using System.Text.RegularExpressions;
+
+namespace RedditClone.Server.Services.BoardService
+{
+    public class BoardService : IBoardService
+    {
+        private readonly DataContext _context;
+        private readonly IUserService _userService;
+
+        public BoardService(DataContext context, IUserService userService)
+        {
+            _context = context;
+            _userService = userService;
+        }
+
+        public async Task<ServiceResponse<Board>> AddBoardAsync(BoardNew board)
+        {
+            var response = new ServiceResponse<Board>();
+            Regex regex = new Regex("^([a-zA-Z0-9])+$");
+            if (!regex.IsMatch(board.Name))
+            {
+                response.Success = false;
+                response.Message = $"Board name contains one or more illegal characters.";
+                return response;
+            }
+            var user = await _context.Users.FindAsync(board.Owner.Id);
+            if (user == null)
+            {
+                response.Success = false;
+                response.Message = $"User not found.";
+                return response;
+            }
+            Board newBoard = new Board { Name = board.Name, Description = board.Description, Owner = user, Nsfw = board.Nsfw };
+            await _context.Boards.AddAsync(newBoard);
+            await _context.SaveChangesAsync();
+            response.Data = newBoard;
+            return response;
+        }
+
+        public async Task<ServiceResponse<Board>> GetBoardByGuidAsync(Guid guid)
+        {
+            var response = new ServiceResponse<Board>();
+            var board = await _context.Boards.Where(b => b.Guid == guid).Include(b => b.Owner).FirstOrDefaultAsync();
+            if (board == null)
+            {
+                response.Success = false;
+                response.Message = $"Board with ID '{guid}' was not found.";
+            }
+            response.Data = board;
+            return response;
+        }
+
+        public async Task<ServiceResponse<Board>> GetBoardByNameAsync(string boardName)
+        {
+            var response = new ServiceResponse<Board>();
+            var board = await _context.Boards.Where(b => b.Name == boardName).Include(b => b.Owner).FirstOrDefaultAsync();
+            if(board == null)
+            {
+                response.Success = false;
+                response.Message = $"The board '{boardName}' was not found.";
+            }
+            response.Data = board;
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<Board>>> GetBoardsAsync()
+        {
+            var response = new ServiceResponse<List<Board>>();
+            var boards = await _context.Boards.Include(b => b.Owner).ToListAsync();
+            if (boards == null || !boards.Any())
+            {
+                response.Success = false;
+                response.Message = $"No boards found.";
+            }
+            response.Data = boards;
+            return response;
+        }
+    }
+}

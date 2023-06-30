@@ -1,0 +1,19 @@
+﻿@inject IUserService UserService
+@inject ILocalStorageService LocalStorage
+
+@code {
+    public User CurrentUser = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        var user = await UserService.GetUserByTokenAsync(token);
+        if (user != null)
+        {
+            if (user.Success && user.Data != null)
+            {
+                CurrentUser = user.Data;
+            }
+        }
+    }
+}

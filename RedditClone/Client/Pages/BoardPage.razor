@@ -1,0 +1,76 @@
+﻿@inject IBoardService BoardService
+@inject IPostService PostService
+@inject NavigationManager NavMan
+
+@page "/b/{BoardName}"
+
+@if(_boardExists)
+{
+    <h3>@BoardName</h3>
+    <hr />
+    @if(_posts == null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        @foreach (var p in _posts)
+        {
+            <PostElement Post="p"></PostElement>
+        }
+    }
+    <AuthorizeView>
+        <Authorized>
+            <button class="my-3 btn btn-primary" @onclick="OnNewPost">@_buttonText</button>
+            @if (_newPost)
+            {
+                <AddPostElement BoardGuid="_board.Guid" />
+            }
+        </Authorized>
+        <NotAuthorized>
+            <p>Please <a href="/login?returnurl=@NavMan.Uri">log in</a> or <a href="/register">register</a> to post.</p>
+        </NotAuthorized>
+    </AuthorizeView>
+}
+else
+{
+    <h3>The board '<span class="font-monospace">@BoardName</span>' does not exist...</h3>
+}
+
+
+
+@code {
+    [Parameter]
+    public string BoardName { get; set; }
+
+    Board _board;
+    List<Post> _posts;
+    bool _boardExists = true;
+    bool _newPost = false;
+    string _buttonText = "New post";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var getBoard = await BoardService.GetBoardByNameAsync(BoardName);
+        if(getBoard != null && getBoard.Success && getBoard.Data != null)
+        {
+            _board = getBoard.Data;
+
+            var getPosts = await PostService.GetPostsByBoardGuidAsync(_board.Guid);
+            if (getPosts != null && getPosts.Success && getPosts.Data != null)
+            {
+                _posts = getPosts.Data;
+            }
+        }
+        else
+        {
+            _boardExists = false;
+        }
+    }
+
+    async Task OnNewPost()
+    {
+        _newPost = !_newPost;
+        _buttonText = _newPost ? "Cancel" : "New post";
+    }
+}

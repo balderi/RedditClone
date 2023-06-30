@@ -1,0 +1,49 @@
+﻿@inject NavigationManager NavMan
+@inject ICommentService CommentService
+
+<EditForm Model="_model" OnValidSubmit="OnSubmit" class="w-25">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <InputTextArea rows="5" class="form-control" id="content" @bind-Value="_model.Content"/>
+    </div>
+    <button class="btn btn-primary mb-3">Save</button>
+    <ValidationMessage For="() => _model.Content" />
+</EditForm>
+<p>@_message</p>
+
+@code {
+    [Parameter]
+    public Post ParentPost { get; set; } = new();
+    [Parameter]
+    public User CommentAuthor { get; set; } = new();
+
+    CommentNew _model = new();
+
+    string _message = string.Empty;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _model = new() { AuthorGuid = CommentAuthor.Guid, PostHash = ParentPost.HashId };
+    }
+
+    async Task OnSubmit()
+    {
+        var result = await CommentService.AddCommentAsync(_model);
+        if(result != null)
+        {
+            if(result.Success && result.Data != null)
+            {
+                _message = "Comment posted!";
+                NavMan.NavigateTo(NavMan.Uri, true);
+            }
+            else
+            {
+                _message = result.Message;
+            }
+        }
+        else
+        {
+            _message = "API call failed.";
+        }
+    }
+}

@@ -1,0 +1,145 @@
+﻿@inherits BaseElement
+
+@inject IPostService PostService
+@inject ICommentService CommentService
+@inject IUserService UserService
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavMan
+
+@page "/b/{BoardName}/comments/{PostHash}"
+
+@if(_postExists)
+{
+    <div class="d-flex mb-3">
+        <div class="d-flex align-items-center">
+            <div class="d-inline-flex flex-column">
+                <div class="fs-6 align-self-center"><span class="oi oi-chevron-top"></span></div>
+                <div class="fs-3 align-self-center">@_points</div>
+                <div class="fs-6"><span class="oi oi-chevron-bottom"></span></div>
+            </div>
+            <div class="d-inline-flex mx-3">
+                <span class="border border-1 border-dark rounded-circle oi oi-copywriting fs-2 p-3"></span>
+            </div>
+        </div>
+        <div class="d-flex flex-column flex-fill">
+            <div class="">
+                <div class="d-inline me-1 badge bg-secondary">tag</div>
+                <div class="d-inline"><a href="#" class="fs-4 text-decoration-none">@_post.Title</a></div>
+            </div>
+            <div class="">
+                <p class="fs-6">Submitted <span title="@_post.DatePosted">@Utils.FormatTime(_post.DatePosted)</span> by <a href="/u/@_author.Username">@_author.Username</a></p>
+                </div>
+            <div class="border border-dark border-1 rounded-2 p-2">
+                @_post.Content
+            </div>
+        </div>
+    </div>
+
+    <div class="border-bottom border-1 border-secondary">
+        <span class="fs-4">all @_commentCount comments</span>
+    </div>
+    <div class="mb-3">
+        <span class="text-muted d-inline-flex">sorted by: </span>
+        <Dropdown TItem="string" OnSelected="OnSelected">
+            <InitialTip>N/A</InitialTip>
+            <ChildContent>
+                <DropdownListItem Item="@_sortValues[0]">N/A</DropdownListItem>
+                <DropdownListItem Item="@_sortValues[1]">None</DropdownListItem>
+            </ChildContent>
+        </Dropdown>
+    </div>
+
+    <AuthorizeView>
+        <Authorized>
+            <PostReplyElement ParentPost="_post" CommentAuthor="CurrentUser" />
+        </Authorized>
+        <NotAuthorized>
+            <p>Please <a href="/login?returnurl=@NavMan.Uri">log in</a> or <a href="/register">register</a> to comment.</p>
+        </NotAuthorized>
+    </AuthorizeView>
+
+    @if(_topComments.Any())
+    {
+        foreach(var c in _topComments)
+        {
+            <CommentElement Comment="c"></CommentElement>
+        }
+    }
+    else
+    {
+        <p>No comments yet...</p>
+    }
+}
+else
+{
+    <h3>The post <span class="font-monospace">@PostHash</span> does not exist...</h3>
+}
+
+@code {
+    [Parameter]
+    public string BoardName { get; set; }
+    [Parameter]
+    public string PostHash { get; set; }
+
+    Board _board = new();
+    Post _post = new();
+    User _author = new();
+    User _user = new();
+    List<Comment> _topComments = new();
+    bool _postExists = true;
+    bool _sortDropDownEnabled = false;
+    int _commentCount;
+    int _points;
+
+    List<string> _sortValues = new() { "N/A", "None" };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var getPost = await PostService.GetPostByHashIdAsync(PostHash);
+        if (getPost != null && getPost.Success && getPost.Data != null)
+        {
+            _post = getPost.Data;
+
+            var getAuthor = await UserService.GetUserByIdAsync(_post.AuthorId);
+            if (getAuthor != null && getAuthor.Success && getAuthor.Data != null)
+            {
+                _author = getAuthor.Data;
+            }
+
+            var getComments = await CommentService.GetCommentsByPostHashAsync(PostHash);
+            if (getComments != null && getComments.Success && getComments.Data != null)
+            {
+                _topComments = getComments.Data;
+            }
+
+            var getCount = await CommentService.CountCommentsByPostHashAsync(PostHash);
+            if (getCount != null && getCount.Success)
+            {
+                _commentCount = getCount.Data;
+            }
+
+            _points = _post.VotesUp - _post.VotesDown;
+        }
+        else
+        {
+            _postExists = false;
+        }
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        if(!string.IsNullOrEmpty(token))
+        {
+            var user = await UserService.GetUserByTokenAsync(token);
+            if (user != null)
+            {
+                if (user.Success && user.Data != null)
+                {
+                    _user = user.Data;
+                }
+            }
+        }
+    }
+
+    void OnSelected()
+    {
+        
+    }
+}

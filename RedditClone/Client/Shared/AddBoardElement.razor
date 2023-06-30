@@ -1,0 +1,85 @@
+﻿@inject IUserService UserService
+@inject IBoardService BoardService
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavMan
+
+<h3>New board</h3>
+
+@if(_user == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="_model" OnValidSubmit="OnSubmit">
+        <DataAnnotationsValidator />
+        <div class="mb-3">
+            <label for="boardName" class="form-label">Name</label>
+            <InputText class="form-control" id="boardName" @bind-Value="_model.Name" ></InputText>
+            <ValidationMessage For="() => _model.Name" />
+        </div>
+        <div class="mb-3">
+            <label for="boardDesc" class="form-label">Description</label>
+            <InputTextArea class="form-control" id="boardDesc" @bind-Value="_model.Description"></InputTextArea>
+            <ValidationMessage For="() => _model.Description" />
+        </div>
+        <div class="mb-3 form-check">
+            <label for="boardNsfw" class="form-label">18+ / NSFW</label>
+            <InputCheckbox class="form-check-input" id="boardNsfw" @bind-Value="_model.Nsfw"></InputCheckbox>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            Submit
+        </button>
+    </EditForm>
+    <p>@_message</p>
+}
+
+
+@code {
+    BoardNew _model = new();
+    User _user;
+    string _message = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        var user = await UserService.GetUserByTokenAsync(token);
+        if(user != null)
+        {
+            if(user.Success && user.Data != null)
+            {
+                _user = user.Data;
+                _model.Owner = _user;
+            }
+            else
+            {
+                _message = user.Message;
+            }
+        }
+        else
+        {
+            _message = "You need to log in first, buddy...";
+        }
+    }
+
+    async Task OnSubmit()
+    {
+        var result = await BoardService.AddBoardAsync(_model);
+        if(result != null)
+        {
+            if(result.Success && result.Data != null)
+            {
+                _message = "Board added!";
+                NavMan.NavigateTo($"/b/{result.Data.Name}", true);
+            }
+            else
+            {
+                _message = result.Message;
+            }
+        }
+        else
+        {
+            _message = "API call failed";
+        }
+    }
+}

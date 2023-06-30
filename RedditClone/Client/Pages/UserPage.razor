@@ -1,0 +1,62 @@
+﻿@inject IPostService PostService
+@inject ICommentService CommentService
+@inject IUserService UserService
+
+@page "/u/{UserName}"
+
+@if(!_userExists)
+{
+    <h3>The user <span class="font-monospace">@UserName</span> does not exist...</h3>
+}
+else
+{
+    <h3>Overview for @UserName</h3>
+    <hr />
+    @if(_posts == null)
+    {
+        <p>Loading Posts...</p>
+    }
+    else
+    {
+        @foreach (var p in _posts)
+        {
+            <PostElement Post="p"></PostElement>
+        }
+    }
+}
+
+
+
+@code {
+    [Parameter]
+    public string UserName { get; set; }
+
+    User _user;
+    List<Post> _posts;
+    List<Comment> _comments;
+
+    bool _userExists = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var getUser = await UserService.GetUserByNameAsync(UserName);
+        if(getUser != null && getUser.Success && getUser.Data != null)
+        {
+            _user = getUser.Data;
+            var getPosts = await PostService.GetPostsByAuthorAsync(_user.Guid);
+            if (getPosts != null && getPosts.Success && getPosts.Data != null)
+            {
+                _posts = getPosts.Data;
+            }
+            var getComments = await CommentService.GetCommentsByAuthorAsync(_user.Guid);
+            if (getComments != null && getComments.Success && getComments.Data != null)
+            {
+                _comments = getComments.Data;
+            }
+        }
+        else
+        {
+            _userExists = false;
+        }
+    }
+}
