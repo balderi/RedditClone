@@ -42,10 +42,10 @@ namespace RedditClone.Server.Controllers
         }
 
         [HttpPost("change-password"), Authorize]
-        public async Task<ActionResult<ServiceResponse<bool>>> ChangePasswordAsync([FromBody] string newPassword)
+        public async Task<ActionResult<ServiceResponse<bool>>> ChangePasswordAsync(UserChangePassword request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _authService.ChangePasswordAsync(int.Parse(userId), newPassword);
+            var response = await _authService.ChangePasswordAsync(int.Parse(userId), request.OldPassword, request.NewPassword);
 
             if (!response.Success)
             {

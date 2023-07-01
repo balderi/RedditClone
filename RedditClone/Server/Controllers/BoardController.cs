@@ -37,7 +37,7 @@ namespace RedditClone.Server.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPost, Authorize]
         public async Task<ActionResult<ServiceResponse<Board>>> AddBoardAsync(BoardNew board)
         {
             var response = await _boardService.AddBoardAsync(board);

@@ -8,11 +8,16 @@
 
 <h5>Change password</h5>
 <EditForm Model="request" OnValidSubmit="ChangePassword">
-    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <DataAnnotationsValidator />
     <div class="mb-3">
-        <label for="password">New Password</label>
-        <InputText id="password" @bind-Value="request.Password" class="form-control" type="password"/>
-        <ValidationMessage For="@(() => request.Password)" />
+        <label for="oldPassword">Current Password</label>
+        <InputText id="oldPassword" @bind-Value="request.OldPassword" class="form-control" type="password" />
+        <ValidationMessage For="@(() => request.OldPassword)" />
+    </div>
+    <div class="mb-3">
+        <label for="newPassword">New Password</label>
+        <InputText id="newPassword" @bind-Value="request.NewPassword" class="form-control" type="password"/>
+        <ValidationMessage For="@(() => request.NewPassword)" />
     </div>
     <div class="mb-3">
         <label for="confirmPassword">Confirm New Password</label>

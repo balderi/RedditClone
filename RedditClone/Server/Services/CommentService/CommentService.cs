@@ -19,14 +19,14 @@ namespace RedditClone.Server.Services.CommentService
         {
             var response = new ServiceResponse<Comment>();
             var post = await _postService.GetPostByHashIdAsync(comment.PostHash);
-            if(post == null || !post.Success)
+            if(post == null || !post.Success || post.Data == null)
             {
                 response.Success = false;
                 response.Message = "Post not found.";
                 return response;
             }
             var user = await _userService.GetUserByGuidAsync(comment.AuthorGuid);
-            if(user == null || !user.Success)
+            if(user == null || !user.Success || user.Data == null)
             {
                 response.Success = false;
                 response.Message = "User not found.";

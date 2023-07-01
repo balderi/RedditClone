@@ -11,7 +11,7 @@
 
         public async Task<ServiceResponse<bool>> ChangePasswordAsync(UserChangePassword request)
         {
-            var result = await _http.PostAsJsonAsync("api/auth/change-password", request.Password);
+            var result = await _http.PostAsJsonAsync("api/auth/change-password", request);
             return await result.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
         }
 

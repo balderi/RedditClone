@@ -145,7 +145,7 @@ namespace RedditClone.Server.Services.AuthService
             return jwt;
         }
 
-        public async Task<ServiceResponse<bool>> ChangePasswordAsync(int userId, string newPassword)
+        public async Task<ServiceResponse<bool>> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
@@ -162,7 +162,15 @@ namespace RedditClone.Server.Services.AuthService
                 return new ServiceResponse<bool>
                 {
                     Success = false,
-                    Message = "User data not found."
+                    Message = "User not found."
+                };
+            }
+            if(!VerifyPasswordHash(oldPassword, userData.PasswordHash, userData.PasswordSalt))
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "User not found."
                 };
             }
 
