@@ -2,51 +2,59 @@
 
 @inject IUserService UserService
 @inject ICommentService CommentService
+@inject NavigationManager NavMan
 
-<details class="p-2 my-3 border border-1 rounded-1" open>
-    @if(_author != null)
-    {
-        <summary>
-            <a href="/u/@_author.Username" class="fw-bold text-decoration-none">@_author.Username</a> <span class="fw-bold">@(Comment.VotesUp - Comment.VotesDown) points</span> <span class="text-muted" title="@Comment.DatePosted">@Utils.FormatTime(Comment.DatePosted)</span>
-        </summary>
-        <div class="d-flex align-top bg-primary bg-gradient bg-opacity-10">
-            <div class="d-inline-flex flex-column">
-                <div class="align-self-start"><span class="oi oi-chevron-top"></span></div>
-                <div class="align-self-end"><span class="oi oi-chevron-bottom"></span></div>
-            </div>
-            <div class="d-flex flex-column ms-3 mt-2">
-                <div class="d-inline-flex flex-row">
-                    <p>@Comment.Content</p>
-                </div>
-                <div class="d-inline-flex flex-row">
-                    <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Replying">reply</button>
-                    <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">permalink</button>
-                    <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">report</button>
-                </div>
-            </div>
-        </div>
-        @if(_replying)
+    <details class="p-2 my-3 border border-1 rounded-1" open>
+        @if(_author != null)
         {
-            <CommentReplyElement CommentAuthor="CurrentUser" ParentComment="Comment" ParentPost="Comment.Post" Cancel="Cancel" />
-        }
-        @if(_children.Any())
-        {
-            foreach(var c in _children)
+            <summary>
+                <a href="/u/@_author.Username" class="fw-bold text-decoration-none">@_author.Username</a> <span class="fw-bold">@(Comment.VotesUp - Comment.VotesDown) points</span> <span class="text-muted" title="@Comment.DatePosted">@Utils.FormatTime(Comment.DatePosted)</span>
+            </summary>
+            <div class="d-flex align-top bg-primary bg-gradient bg-opacity-10">
+                <div class="d-inline-flex flex-column">
+                    <div class="align-self-start"><span class="oi oi-chevron-top"></span></div>
+                    <div class="align-self-end"><span class="oi oi-chevron-bottom"></span></div>
+                </div>
+                <div class="d-flex flex-column ms-3 mt-2">
+                    <div class="d-inline-flex flex-row">
+                        <p>@Comment.Content</p>
+                    </div>
+                    <div class="d-inline-flex flex-row">
+                        <AuthorizeView>
+                            <Authorized>
+                                <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Replying">reply</button>
+                            </Authorized>
+                            <NotAuthorized>
+                                <a href="/login?returnurl=@NavMan.Uri" class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold">reply</a>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                        <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">permalink</button>
+                        <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">report</button>
+                    </div>
+                </div>
+            </div>
+            @if(_replying)
             {
-                <CommentElement Comment="c"></CommentElement>
+                <CommentReplyElement CommentAuthor="CurrentUser" ParentComment="Comment" ParentPost="Comment.Post" Cancel="Cancel" />
             }
+            @if(_children.Any())
+            {
+                foreach(var c in _children)
+                {
+                    <CommentElement Comment="c"></CommentElement>
+                }
+            }
+            <p>@_test</p>
         }
-        <p>@_test</p>
-    }
-    else
-    {
-        <summary>
-            Loading...
-        </summary>
-        <p>Loading...</p>
-    }
+        else
+        {
+            <summary>
+                Loading...
+            </summary>
+            <p>Loading...</p>
+        }
     
-</details>
+    </details>
 
 @code {
     [Parameter]
