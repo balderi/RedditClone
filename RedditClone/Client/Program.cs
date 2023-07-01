@@ -10,6 +10,8 @@ global using RedditClone.Client.Services.CommentService;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Blazored.LocalStorage;
+using Blazorise.Modules;
+using Blazorise;
 
 namespace RedditClone.Client
 {
@@ -28,6 +30,7 @@ namespace RedditClone.Client
             builder.Services.AddScoped<IBoardService, BoardService>();
             builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
+            builder.Services.AddSingleton<IJSFileModule, JSFileModule>();
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
