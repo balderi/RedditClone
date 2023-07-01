@@ -69,7 +69,7 @@
                 @if(!string.IsNullOrEmpty(_post.Content))
                 {
                     <div class="border border-dark border-1 rounded-2 p-2">
-                        @((MarkupString)_post.Content)
+                        <span class="mb-2">@((MarkupString)Markdig.Markdown.ToHtml(_post.Content).Replace("<p>", "<p  class=\"mb-1\">"))</span>
                     </div>
                 }
             </div>

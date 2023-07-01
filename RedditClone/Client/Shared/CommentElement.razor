@@ -17,7 +17,7 @@
                 </div>
                 <div class="d-flex flex-column ms-3 mt-2">
                     <div class="d-inline-flex flex-row">
-                    <p>@((MarkupString)Markdig.Markdown.ToHtml(Comment.Content))</p>
+                    <span class="mb-2">@((MarkupString)Markdig.Markdown.ToHtml(Comment.Content).Replace("<p>", "<p  class=\"mb-1\">"))</span>
                     </div>
                     <div class="d-inline-flex flex-row">
                         <AuthorizeView>
@@ -44,7 +44,6 @@
                     <CommentElement Comment="c"></CommentElement>
                 }
             }
-            <p>@_test</p>
         }
         else
         {
@@ -64,8 +63,6 @@
     List<Comment> _children = new();
 
     bool _replying = false;
-
-    string _test = "";
 
     protected override async Task OnParametersSetAsync()
     {
