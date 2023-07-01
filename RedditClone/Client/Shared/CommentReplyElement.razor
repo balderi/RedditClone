@@ -25,6 +25,7 @@
     CommentNew _model = new();
 
     string _message = string.Empty;
+    string _preview = string.Empty;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -55,5 +56,11 @@
     async Task OnCancel()
     {
         await Cancel.InvokeAsync();
+    }
+
+    Task OnValueChanged(string value)
+    {
+        _preview = Markdig.Markdown.ToHtml(value);
+        return Task.CompletedTask;
     }
 }

@@ -48,10 +48,10 @@
     else
     {
         <div class="d-flex mb-3">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-start">
                 <div class="d-inline-flex flex-column">
-                    <div class="fs-6 align-self-center"><span class="oi oi-chevron-top"></span></div>
-                    <div class="fs-3 align-self-center">@_points</div>
+                    <div class="fs-6"><span class="oi oi-chevron-top"></span></div>
+                    <div class="fs-3">@_points</div>
                     <div class="fs-6"><span class="oi oi-chevron-bottom"></span></div>
                 </div>
                 <div class="d-inline-flex mx-3">
@@ -69,7 +69,7 @@
                 @if(!string.IsNullOrEmpty(_post.Content))
                 {
                     <div class="border border-dark border-1 rounded-2 p-2">
-                        @_post.Content
+                        @((MarkupString)_post.Content)
                     </div>
                 }
             </div>
