@@ -8,7 +8,13 @@
         @if(_author != null)
         {
             <summary>
-                <a href="/u/@_author.Username" class="fw-bold text-decoration-none">@_author.Username</a> <span class="fw-bold">@(Comment.VotesUp - Comment.VotesDown) points</span> <span class="text-muted" title="@Comment.DatePosted">@Utils.FormatTime(Comment.DatePosted)</span>
+                <a href="/u/@_author.Username" class="fw-bold text-decoration-none">@_author.Username</a> 
+                <span class="fw-bold">@(Comment.VotesUp - Comment.VotesDown) points</span> 
+                <span class="text-muted" title="@Comment.DatePosted.ToLocalTime().ToString("ddd MMM dd yyyy HH:mm:ss UTC zzz")">@Utils.FormatTime(Comment.DatePosted)</span>
+                @if(Comment.Edited)
+                {
+                    <span class="text-muted" title="@Comment.DateEdited.ToLocalTime().ToString("ddd MMM dd yyyy HH:mm:ss UTC zzz")">* (last edited @Utils.FormatTime(Comment.DateEdited))</span>
+                }
             </summary>
             <div class="d-flex align-top bg-primary bg-gradient bg-opacity-10">
                 <div class="d-inline-flex flex-column">
@@ -17,12 +23,24 @@
                 </div>
                 <div class="d-flex flex-column ms-3 mt-2">
                     <div class="d-inline-flex flex-row">
-                    <span class="mb-2">@((MarkupString)Markdig.Markdown.ToHtml(Comment.Content).Replace("<p>", "<p  class=\"mb-1\">"))</span>
+
+                    @if (_editing)
+                    {
+                        <CommentReplyElement CommentAuthor="CurrentUser" ParentComment="Comment" ParentPost="Comment.Post" Cancel="Cancel" Editing="true" Content="@Comment.Content" />
+                    }
+                    else
+                    {
+                        <span class="mb-2">@((MarkupString)Markdig.Markdown.ToHtml(Comment.Content).Replace("<p>", "<p  class=\"mb-1\">"))</span>
+                    }
                     </div>
                     <div class="d-inline-flex flex-row">
                         <AuthorizeView>
                             <Authorized>
                                 <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Replying">reply</button>
+                                @if(Comment.AuthorID == CurrentUser.Id)
+                                {
+                                    <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Editing">edit</button>
+                                }
                             </Authorized>
                             <NotAuthorized>
                                 <a href="/login?returnurl=@NavMan.Uri" class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold">reply</a>
@@ -33,7 +51,7 @@
                     </div>
                 </div>
             </div>
-            @if(_replying)
+            @if (_replying)
             {
                 <CommentReplyElement CommentAuthor="CurrentUser" ParentComment="Comment" ParentPost="Comment.Post" Cancel="Cancel" />
             }
@@ -63,6 +81,7 @@
     List<Comment> _children = new();
 
     bool _replying = false;
+    bool _editing = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -90,8 +109,14 @@
         _replying = true;
     }
 
+    void Editing()
+    {
+        _editing = true;
+    }
+
     void Cancel()
     {
         _replying = false;
+        _editing = false;
     }
 }

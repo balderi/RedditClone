@@ -21,14 +21,14 @@
 else
 {
     <div class="d-flex align-items-center">
-        <div class="d-flex flex-column h-100 m-2">@Number</div>
-        <div class="d-flex flex-column h-100 m-2"><span class="border border-1 border-dark rounded-circle oi oi-copywriting fs-4 p-3"></span></div>
+        <div class="d-flex flex-column h-100 m-2"><h3>@Number</h3></div>
+        <div class="d-flex flex-column h-100 m-2"><span class="border border-1 border-dark rounded-circle oi @_postType fs-2 p-4"></span></div>
         <div class="d-flex flex-column h-100 m-2">
-            <div class="d-flex align-top"><a href="@_link">@Post.Title</a> <span class="ms-3 badge bg-secondary">Tag</span></div>
+            <div class="d-flex align-top"><a href="@_link" class="text-decoration-none"><h4 class="m-0">@Post.Title</h4></a> <span class="m-auto ms-3 badge bg-secondary">Tag</span></div>
             <div class="d-flex align-bottom">
                 <div class="d-flex flex-column align-top">
                     @*<span class="fs-1">+</span>*@
-                    <div>
+                    <div class="mb-1">
                         Submitted <span title="@Post.DatePosted">@Utils.FormatTime(Post.DatePosted)</span> by <a href="/u/@_author.Username">@_author.Username</a>
                     </div>
                     <div>
@@ -36,7 +36,7 @@ else
                         {
                             <span class="me-3 border border-1 border-danger text-danger rounded-3 p-1" style="font-size:smaller">NSFW</span>
                         }
-                        <a href="@_commentLink">@_commentCount comments</a>
+                        <a href="@_commentLink">@_commentCount @(_commentCount == 1 ? "comment" : "comments")</a>
                     </div>
                     @*<span>to <a href="/b/@Post.Board.Name">@Post.Board.Name</a></span>*@
                 </div>
@@ -57,6 +57,7 @@ else
     int _commentCount;
     string _link = string.Empty;
     string _commentLink = string.Empty;
+    string _postType = "oi-copywriting";
     User _author = new User { Username = "Loading..." };
 
     protected override async Task OnParametersSetAsync()
@@ -74,6 +75,7 @@ else
 
         _commentLink = $"/b/{Post.Board.Name}/comments/{Post.HashId}";
         _link = string.IsNullOrEmpty(Post.Link) ? _commentLink : Post.Link;
+        _postType = string.IsNullOrEmpty(Post.Link) ? "oi-copywriting" : "oi-link-intact";
 
         var getAuthor = await UserService.GetUserByIdAsync(Post.AuthorId);
         if(getAuthor != null && getAuthor.Success && getAuthor.Data != null)

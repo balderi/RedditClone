@@ -13,23 +13,33 @@ namespace RedditClone.Shared
             var span = DateTime.UtcNow.Subtract(dt);
             if(span.TotalDays > 365)
             {
-                return $"{(int)(span.TotalDays / 365)} years ago";
+                var value = (int)(span.TotalDays / 365);
+                var time = value == 1 ? "year" : "years";
+                return $"{value} {time} ago";
             }
             if(span.TotalDays > 30)
             {
-                return $"{(int)(span.TotalDays / 30)} months ago";
+                var value = (int)(span.TotalDays / 30);
+                var time = value == 1 ? "month" : "months";
+                return $"{value} {time} ago";
             }
             if(span.TotalHours > 24)
             {
-                return $"{(int)(span.TotalDays)} days ago";
+                var value = (int)(span.TotalDays);
+                var time = value == 1 ? "day" : "days";
+                return $"{value} {time} ago";
             }
             if(span.TotalMinutes > 60)
             {
-                return $"{(int)(span.TotalHours)} hours ago";
+                var value = (int)(span.TotalHours);
+                var time = value == 1 ? "hour" : "hours";
+                return $"{value} {time} ago";
             }
             if(span.TotalMinutes >= 2)
             {
-                return $"{(int)(span.TotalMinutes)} minutes ago";
+                var value = (int)(span.TotalMinutes);
+                var time = value == 1 ? "minute" : "minutes";
+                return $"{value} {time} ago";
             }
             if(span.TotalSeconds > 60)
             {

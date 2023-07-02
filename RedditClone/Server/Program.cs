@@ -64,7 +64,7 @@ namespace RedditClone
             }
 
             app.UseSwagger();
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
