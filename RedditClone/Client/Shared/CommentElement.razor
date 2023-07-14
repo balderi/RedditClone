@@ -21,12 +21,19 @@
                 <div class="align-self-start"><span class="oi oi-chevron-top"></span></div>
                 <div class="align-self-end"><span class="oi oi-chevron-bottom"></span></div>
             </div>
-            <div class="d-flex flex-column ms-3 mt-2">
-                <div class="d-inline-flex flex-row">
+            <div class="w-100 d-inline-flex flex-column ms-3 mt-2">
+                <div class="d-flex flex-row">
 
                 @if (_editing)
                 {
                     <CommentReplyElement CommentAuthor="CurrentUser" ParentComment="Comment" ParentPost="Comment.Post" Cancel="Cancel" Editing="true" Content="@Comment.Content" />
+                }
+                else if(_source)
+                {
+                    <form class="w-100">
+                        <textarea class="form-control" value="@Comment.Content" rows="@_lines" readonly></textarea>
+                        <button type="button" class="btn btn-primary my-3" @onclick="Cancel"><span class="oi oi-x"> </span> Close</button>
+                    </form>
                 }
                 else
                 {
@@ -46,6 +53,7 @@
                             <a href="/login?returnurl=@NavMan.Uri" class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold">reply</a>
                         </NotAuthorized>
                     </AuthorizeView>
+                    <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold" @onclick="ShowSource">source</button>
                     <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">permalink</button>
                     <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">report</button>
                 </div>
@@ -79,8 +87,8 @@
     User _author = new User { Username = "Loading..." };
     List<Comment> _children = new();
 
-    bool _replying = false;
-    bool _editing = false;
+    bool _replying, _editing, _source;
+    int _lines;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -90,6 +98,7 @@
             _author = getAuthor.Data;
             _children = await GetChildren(Comment.HashId);
         }
+        _lines = Comment.Content.Count(c => c.Equals('\n')) + 1;
     }
 
     async Task<List<Comment>> GetChildren(string hash)
@@ -113,9 +122,15 @@
         _editing = true;
     }
 
+    void ShowSource()
+    {
+        _source = true;
+    }
+
     void Cancel()
     {
         _replying = false;
         _editing = false;
+        _source = false;
     }
 }

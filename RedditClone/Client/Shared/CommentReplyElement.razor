@@ -4,7 +4,7 @@
 <EditForm Model="_model" OnValidSubmit="OnSubmit" class="w-100 mt-3 border border-1 border-secondary rounded-3">
     <DataAnnotationsValidator />
     <div class="m-3">
-        <InputTextArea rows="5" class="form-control" id="content" @bind-Value="_model.Content"/>
+        <InputTextArea rows="@_lines" class="form-control" id="content" @bind-Value="_model.Content"/>
     </div>
     <button class="btn btn-primary ms-3 mb-3" type="submit">Save</button>
     <button class="btn btn-primary ms-3 mb-3" @onclick="OnCancel">Cancel</button>
@@ -29,10 +29,16 @@
     CommentNew _model = new();
 
     string _message = string.Empty;
+    int _lines = 5;
 
     protected override async Task OnParametersSetAsync()
     {
         _model = new() { AuthorGuid = CommentAuthor.Guid, PostHash = ParentPost.HashId, ParentHash = ParentComment.HashId, Content = Content };
+        
+        if(Editing)
+        {
+            _lines = Content.Count(c => c.Equals('\n')) + 1;
+        }
     }
 
     async Task OnSubmit()
