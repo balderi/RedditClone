@@ -23,8 +23,8 @@ else
     <div class="d-flex align-items-center">
         <div class="d-flex flex-column h-100 m-2"><h3>@Number</h3></div>
         <div class="d-flex flex-column h-100 m-2"><span class="border border-1 border-dark rounded-circle oi @_postType fs-2 p-4"></span></div>
-        <div class="d-flex flex-column h-100 m-2">
-            <div class="d-flex align-top"><a href="@_link" class="text-decoration-none"><h4 class="m-0">@Post.Title</h4></a> <span class="m-auto ms-3 badge bg-secondary">Tag</span></div>
+        <div class="d-flex flex-column h-100 m-2 flex-fill">
+            <div class="d-flex align-top"><a href="@_link" class="fs-4 text-decoration-none">@Post.Title</a> <span class="text-muted ms-2 align-self-center">(@_baseLink)</span> <span class="m-auto ms-2 badge bg-secondary">Tag</span></div>
             <div class="d-flex align-bottom">
                 <div class="d-flex flex-column align-top">
                     @*<span class="fs-1">+</span>*@
@@ -56,6 +56,7 @@ else
     public int Number { get; set; }
     int _commentCount;
     string _link = string.Empty;
+    string _baseLink = string.Empty;
     string _commentLink = string.Empty;
     string _postType = "oi-copywriting";
     User _author = new User { Username = "Loading..." };
@@ -81,6 +82,19 @@ else
         if(getAuthor != null && getAuthor.Success && getAuthor.Data != null)
         {
             _author = getAuthor.Data;
+        }
+
+        if (!string.IsNullOrEmpty(Post.Link))
+        {
+            _link = Post.Link;
+            _postType = "oi-link-intact";
+            var uri = new Uri(Post.Link);
+            _baseLink = uri.Host;
+        }
+        else
+        {
+            _postType = "oi-copywriting";
+            _baseLink = $"self.{Post.Board.Name}";
         }
     }
 }
