@@ -74,7 +74,7 @@
 
 @code {
     [Parameter]
-    public Comment Comment { get; set; }
+    public Comment Comment { get; set; } = new();
 
     User _author = new User { Username = "Loading..." };
     List<Comment> _children = new();

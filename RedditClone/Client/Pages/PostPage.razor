@@ -127,11 +127,11 @@ else
 
 @code {
     [CascadingParameter]
-    public MainLayout Layout { get; set; }
+    public MainLayout Layout { get; set; } = new();
     [Parameter]
-    public string BoardName { get; set; }
+    public string BoardName { get; set; } = string.Empty;
     [Parameter]
-    public string PostHash { get; set; }
+    public string PostHash { get; set; } = string.Empty;
 
     Board _board = new();
     Post _post = new();

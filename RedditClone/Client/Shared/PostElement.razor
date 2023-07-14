@@ -27,7 +27,7 @@ else
             <div class="d-flex align-top"><a href="@_link" class="fs-4 text-decoration-none">@Post.Title</a> <span class="text-muted ms-2 align-self-center">(@_baseLink)</span> <span class="m-auto ms-2 badge bg-secondary">Tag</span></div>
             <div class="d-flex align-bottom">
                 <div class="d-flex flex-column align-top">
-                    @*<span class="fs-1">+</span>*@
+                    @*<span class="fs-1">+</span> TODO: expando*@ 
                     <div class="mb-1">
                         Submitted <span title="@Post.DatePosted">@Utils.FormatTime(Post.DatePosted)</span> by <a href="/u/@_author.Username">@_author.Username</a>
                     </div>
@@ -38,11 +38,7 @@ else
                         }
                         <a href="@_commentLink">@_commentCount @(_commentCount == 1 ? "comment" : "comments")</a>
                     </div>
-                    @*<span>to <a href="/b/@Post.Board.Name">@Post.Board.Name</a></span>*@
                 </div>
-                @*<div class="d-flex align-bottom">
-                    <a href="@_commentLink">@_commentCount comments</a>
-                </div>*@
             </div>
         </div>
     </div>
@@ -63,11 +59,6 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        //if(Post == null || string.IsNullOrEmpty(Post.HashId))
-        //{
-        //    return;
-        //}
-
         var getCount = await CommentService.CountCommentsByPostHashAsync(Post.HashId);
         if(getCount != null && getCount.Success)
         {
@@ -86,8 +77,6 @@ else
 
         if (!string.IsNullOrEmpty(Post.Link))
         {
-            _link = Post.Link;
-            _postType = "oi-link-intact";
             var uri = new Uri(Post.Link);
             _baseLink = uri.Host;
         }
