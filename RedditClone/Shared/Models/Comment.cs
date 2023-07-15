@@ -2,11 +2,11 @@
 
 namespace RedditClone.Shared.Models
 {
-    public class Comment
+    public class Comment : ISubmission
     {
         public int Id { get; set; }
         public string HashId { get; set; } = string.Empty;  
-        public int AuthorID { get; set; }
+        public int AuthorId { get; set; }
         public string Content { get; set; } = string.Empty;
         public int ParentId { get; set; }
         [ForeignKey("PostId")]

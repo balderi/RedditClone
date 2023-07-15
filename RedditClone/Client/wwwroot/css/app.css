@@ -2,6 +2,11 @@
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+}
+
+#app {
+    min-height: 100vh;
 }
 
 h1:focus {
@@ -89,4 +94,11 @@ details > summary::marker {
     left: 0 !important;
     top: 0 !important;
     height: 1rem !important;
+}
+
+blockquote {
+    border-left: 3px solid lightgray;
+    padding: 0.2rem 0.2rem 0.2rem 0.75rem;
+    margin: 0.25rem;
+    color: dimgray;
 }

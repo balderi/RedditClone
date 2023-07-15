@@ -2,7 +2,7 @@
 
 namespace RedditClone.Shared.Models
 {
-    public class Post
+    public class Post : ISubmission
     {
         public int Id { get; set; }
         public string HashId { get; set; } = string.Empty;

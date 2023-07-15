@@ -44,5 +44,12 @@
             var result = await _http.GetFromJsonAsync<ServiceResponse<List<Comment>>>($"api/comment/get/author/{guid}");
             return result;
         }
+
+        public async Task<ServiceResponse<Comment>> EditCommentAsync(int commentId, string token, string newContent)
+        {
+            var edit = new CommentEdit { CommentId = commentId, UserToken = token, NewContent = newContent };
+            var result = await _http.PutAsJsonAsync("api/comment", edit);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<Comment>>();
+        }
     }
 }

@@ -12,15 +12,23 @@ else
 {
     <h3>Overview for @UserName</h3>
     <hr />
-    @if(_posts == null)
+    @if(_submissions == null)
     {
         <p>Loading Posts...</p>
     }
     else
     {
-        @foreach (var p in _posts)
+        <p>@_test</p>
+        @foreach (var s in _submissions.Distinct())
         {
-            <PostElement Post="p"></PostElement>
+            if(s is Post)
+            {
+                <PostElement Post="s as Post" />
+            }
+            if(s is Comment)
+            {
+                <CommentElement Comment="s as Comment" HideChildren="true" />
+            }
         }
     }
 }
@@ -29,18 +37,21 @@ else
 
 @code {
     [CascadingParameter]
-    public MainLayout Layout { get; set; }
+    public MainLayout Layout { get; set; } = new();
 
     [Parameter]
-    public string UserName { get; set; }
+    public string UserName { get; set; } = string.Empty;
 
-    User _user;
-    List<Post> _posts;
-    List<Comment> _comments;
+    User _user = new();
+    List<Post> _posts = new();
+    List<Comment> _comments = new();
+    List<ISubmission> _submissions = new();
 
     bool _userExists = true;
 
-    protected override async Task OnParametersSetAsync()
+    string _test = string.Empty;
+
+    protected override async Task OnInitializedAsync()
     {
         if (Layout.CurrentBoard != null)
         {
@@ -55,16 +66,23 @@ else
             if (getPosts != null && getPosts.Success && getPosts.Data != null)
             {
                 _posts = getPosts.Data;
+                _submissions.AddRange(_posts);
+                _test += $"{_posts.Count} posts | ";
             }
             var getComments = await CommentService.GetCommentsByAuthorAsync(_user.Guid);
             if (getComments != null && getComments.Success && getComments.Data != null)
             {
                 _comments = getComments.Data;
+                _submissions.AddRange(_comments);
+                _test += $"{_comments.Count} comments | ";
             }
         }
         else
         {
             _userExists = false;
         }
+        _test += $"{_submissions.Count} submissions";
+
+        _submissions = _submissions.Distinct().OrderByDescending(s => s.DatePosted).ToList();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using RedditClone.Shared;
+using System;
 
 namespace RedditClone.Server.Services.CommentService
 {
@@ -33,7 +34,7 @@ namespace RedditClone.Server.Services.CommentService
                 return response;
             }
 
-            Comment newComment = new Comment { Content = comment.Content, AuthorID = user.Data.Id, Post = post.Data };
+            Comment newComment = new Comment { Content = comment.Content, AuthorId = user.Data.Id, Post = post.Data };
 
             if (!string.IsNullOrEmpty(comment.ParentHash))
             {
@@ -148,7 +149,7 @@ namespace RedditClone.Server.Services.CommentService
                 return response;
             }
 
-            var comments = await _context.Comments.Include(c => c.Post).ThenInclude(p => p.Board).ThenInclude(b => b.Owner).Where(c => c.AuthorID == user.Data.Id).ToListAsync();
+            var comments = await _context.Comments.Include(c => c.Post).ThenInclude(p => p.Board).ThenInclude(b => b.Owner).Where(c => c.AuthorId == user.Data.Id).ToListAsync();
             if (comments == null || !comments.Any())
             {
                 response.Success = false;
@@ -156,6 +157,41 @@ namespace RedditClone.Server.Services.CommentService
                 return response;
             }
             response.Data = comments;
+            return response;
+        }
+
+        public async Task<ServiceResponse<Comment>> EditCommentAsync(CommentEdit edit)
+        {
+            var response = new ServiceResponse<Comment>();
+            var user = await _userService.GetUserByTokenAsync(edit.UserToken);
+            if (user == null || !user.Success || user.Data == null)
+            {
+                response.Success = false;
+                response.Message = $"User not found.";
+                return response;
+            }
+
+            var comment = await _context.Comments.FindAsync(edit.CommentId);
+            if (comment == null || comment.AuthorId != user.Data.Id)
+            {
+                response.Success = false;
+                response.Message = $"Comment not found.";
+                return response;
+            }
+
+            if(comment.Content == edit.NewContent)
+            {
+                response.Data = comment;
+                return response;
+            }
+
+            comment.Content = edit.NewContent;
+            comment.Edited = true;
+            comment.DateEdited = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            response.Data = comment;
             return response;
         }
     }

@@ -4,9 +4,9 @@
 @inherits LayoutComponentBase
 
 <CascadingValue Value="this">
-    <div class="page">
-        <main>
-            <div class="top-row px-4">
+    <div class="page min-vh-100">
+        <main class="d-flex flex-column align-items-center">
+            <div class="top-row px-4 w-100">
                 <span class="d-flex align-self-start me-auto ms-0">
                     <a class="d-inline-flex align-items-end ms-0" href="/"><h1 class="m-0 p-0 mt-2 align-bottom">Title</h1></a>
                     @if(_currentBoard != null)
@@ -16,7 +16,7 @@
                 </span>
                 <AuthorizeView>
                     <Authorized>
-                        <a href="/profile" class="btn btn-primary">@context.User.Identity.Name</a>
+                        <a href="/profile" class="btn btn-primary"><span class="oi oi-person"> </span> @context.User.Identity.Name</a>
                         <button class="btn btn-outline-danger mx-3" @onclick="Logout">Logout</button>
                     </Authorized>
                     <NotAuthorized>
@@ -26,9 +26,12 @@
                 </AuthorizeView>
             </div>
 
-            <article class="content px-4">
+            <article class="content px-4 w-100 mb-auto">
                 @Body
             </article>
+            <footer class="mt-5">
+                <FooterElement />
+            </footer>
         </main>
     </div>
 </CascadingValue>

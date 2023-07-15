@@ -8,5 +8,6 @@
         Task<ServiceResponse<Comment>> GetCommentByHashAsync(string hash);
         Task<ServiceResponse<Comment>> AddCommentAsync(CommentNew comment);
         Task<ServiceResponse<List<Comment>>> GetCommentsByAuthorAsync(Guid guid);
+        Task<ServiceResponse<Comment>> EditCommentAsync(CommentEdit edit);
     }
 }

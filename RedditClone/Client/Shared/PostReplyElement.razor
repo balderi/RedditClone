@@ -6,7 +6,7 @@
     <div class="mb-3">
         <InputTextArea rows="5" class="form-control" id="content" @bind-Value="_model.Content"/>
     </div>
-    <button class="btn btn-primary mb-3">Save</button>
+    <button class="btn btn-primary mb-3"><span class="oi oi-circle-check"> </span> Save</button>
     <ValidationMessage For="() => _model.Content" />
 </EditForm>
 <p>@_message</p>

@@ -26,13 +26,13 @@
 
                 @if (_editing)
                 {
-                    <CommentReplyElement CommentAuthor="CurrentUser" ParentComment="Comment" ParentPost="Comment.Post" Cancel="Cancel" Editing="true" Content="@Comment.Content" />
-                }
+                        <CommentEditElement Comment="Comment" Cancel="Cancel" CommentAuthor="_author" />
+                    }
                 else if(_source)
                 {
                     <form class="w-100">
                         <textarea class="form-control" value="@Comment.Content" rows="@_lines" readonly></textarea>
-                        <button type="button" class="btn btn-primary my-3" @onclick="Cancel"><span class="oi oi-x"> </span> Close</button>
+                        <button type="button" class="btn btn-primary my-3" @onclick="Cancel"><span class="oi oi-circle-x"> </span> Close</button>
                     </form>
                 }
                 else
@@ -44,7 +44,7 @@
                     <AuthorizeView>
                         <Authorized>
                             <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Replying">reply</button>
-                            @if(Comment.AuthorID == CurrentUser.Id)
+                            @if(Comment.AuthorId == CurrentUser.Id)
                             {
                                 <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Editing">edit</button>
                             }
@@ -63,7 +63,7 @@
         {
             <CommentReplyElement CommentAuthor="CurrentUser" ParentComment="Comment" ParentPost="Comment.Post" Cancel="Cancel" />
         }
-        @if(_children.Any())
+        @if(!HideChildren && _children.Any())
         {
             foreach(var c in _children)
             {
@@ -84,6 +84,9 @@
     [Parameter]
     public Comment Comment { get; set; } = new();
 
+    [Parameter]
+    public bool HideChildren { get; set; }
+
     User _author = new User { Username = "Loading..." };
     List<Comment> _children = new();
 
@@ -92,7 +95,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        var getAuthor = await UserService.GetUserByIdAsync(Comment.AuthorID);
+        var getAuthor = await UserService.GetUserByIdAsync(Comment.AuthorId);
         if(getAuthor != null && getAuthor.Success && getAuthor.Data != null)
         {
             _author = getAuthor.Data;
