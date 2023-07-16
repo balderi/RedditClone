@@ -1,5 +1,6 @@
 ﻿@page "/register"
 @inject IAuthService AuthService
+@inject NavigationManager NavMan
 
 <PageTitle>Register</PageTitle>
 
@@ -39,5 +40,11 @@
         var result = await AuthService.RegisterAsync(user);
         message = result.Message;
         messageCssClass = result.Success ? "text-success" : "text-danger";
+
+        if(result.Success)
+        {
+            await Task.Delay(2000);
+            NavMan.NavigateTo("/login");
+        }
     }
 }
