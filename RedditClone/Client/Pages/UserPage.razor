@@ -19,7 +19,7 @@ else
     else
     {
         <p>@_test</p>
-        @foreach (var s in _submissions.Distinct())
+        @foreach (var s in _submissions)
         {
             if(s is Post)
             {
@@ -83,6 +83,6 @@ else
         }
         _test += $"{_submissions.Count} submissions";
 
-        _submissions = _submissions.Distinct().OrderByDescending(s => s.DatePosted).ToList();
+        _submissions = _submissions.OrderByDescending(s => s.DatePosted).ToList();
     }
 }
