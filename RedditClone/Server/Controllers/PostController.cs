@@ -55,5 +55,12 @@ namespace RedditClone.Server.Controllers
             var response = await _postService.AddPostAsync(post);
             return Ok(response);
         }
+
+        [HttpPut, Authorize]
+        public async Task<ActionResult<ServiceResponse<Post>>> EditPostAsync(PostEdit edit)
+        {
+            var response = await _postService.EditPostAsync(edit);
+            return Ok(response);
+        }
     }
 }

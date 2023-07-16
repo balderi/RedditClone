@@ -1,10 +1,11 @@
 ﻿@inject NavigationManager NavMan
-@inject ICommentService CommentService
+@inject ILocalStorageService LocalStorage
+@inject IPostService PostService
 
 <EditForm Model="_model" OnValidSubmit="OnSubmit" class="w-100 mt-3 border border-1 border-secondary rounded-3">
     <DataAnnotationsValidator />
     <div class="m-3">
-        <InputTextArea rows="@_lines" class="form-control" id="content" @bind-Value="_model.Content"/>
+        <InputTextArea rows="@_lines" class="form-control" id="content" @bind-Value="_model.Content" />
     </div>
     <button class="btn btn-primary ms-3 mb-3" type="submit"><span class="oi oi-circle-check"> </span> Save</button>
     <button class="btn btn-primary ms-3 mb-3" @onclick="OnCancel"><span class="oi oi-circle-x"> </span> Cancel</button>
@@ -14,35 +15,45 @@
 
 @code {
     [Parameter]
-    public Post ParentPost { get; set; } = new();
+    public Post Post { get; set; } = new();
     [Parameter]
-    public Comment ParentComment { get; set; } = new();
-    [Parameter]
-    public User CommentAuthor { get; set; } = new();
+    public User PostAuthor { get; set; } = new();
     [Parameter]
     public EventCallback Cancel { get; set; }
-    [Parameter]
-    public string Content { get; set; } = string.Empty;
 
-    CommentNew _model = new();
+    PostNew _model = new();
 
     string _message = string.Empty;
+    string _token = string.Empty;
     int _lines = 5;
 
     protected override async Task OnParametersSetAsync()
     {
-        _model = new() { AuthorGuid = CommentAuthor.Guid, PostHash = ParentPost.HashId, ParentHash = ParentComment.HashId, Content = Content };
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        if (!string.IsNullOrEmpty(token))
+        {
+            _token = token;
+        }
+
+        _model.Content = Post.Content;
+
         _lines = _model.Content.Count(c => c.Equals('\n')) + 1;
     }
 
     async Task OnSubmit()
     {
-        var result = await CommentService.AddCommentAsync(_model);
+        if (string.IsNullOrEmpty(_token))
+        {
+            _message = "Error fetching token";
+            return;
+        }
+
+        var result = await PostService.EditPostAsync(Post.Id, _token, _model.Content);
         if (result != null)
         {
             if (result.Success && result.Data != null)
             {
-                _message = "Comment posted!";
+                _message = "Post edited!";
                 NavMan.NavigateTo(NavMan.Uri, true);
             }
             else

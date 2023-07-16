@@ -4,7 +4,7 @@
 @inject ICommentService CommentService
 @inject NavigationManager NavMan
 
-<details class="p-2 my-3 border border-1 border-primary rounded-1 bg-primary bg-gradient bg-opacity-10" open>
+<details class="p-2 my-3 border border-1 rounded-1 @_bg bg-gradient" open>
     @if(_author != null)
     {
         <summary class="rounded-1 bg-light mb-1 p-1">
@@ -27,7 +27,7 @@
                 @if (_editing)
                 {
                         <CommentEditElement Comment="Comment" Cancel="Cancel" CommentAuthor="_author" />
-                    }
+                }
                 else if(_source)
                 {
                     <form class="w-100">
@@ -54,7 +54,7 @@
                         </NotAuthorized>
                     </AuthorizeView>
                     <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold" @onclick="ShowSource">source</button>
-                    <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">permalink</button>
+                    <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold" @onclick="PermaLink">permalink</button>
                     <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">report</button>
                 </div>
             </div>
@@ -67,7 +67,7 @@
         {
             foreach(var c in _children)
             {
-                <CommentElement Comment="c"></CommentElement>
+                <CommentElement Comment="c" OddChild="!OddChild"></CommentElement>
             }
         }
     }
@@ -87,11 +87,15 @@
     [Parameter]
     public bool HideChildren { get; set; }
 
+    [Parameter]
+    public bool OddChild { get; set; }
+
     User _author = new User { Username = "Loading..." };
     List<Comment> _children = new();
 
     bool _replying, _editing, _source;
     int _lines;
+    string _bg = string.Empty;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -102,6 +106,8 @@
             _children = await GetChildren(Comment.HashId);
         }
         _lines = Comment.Content.Count(c => c.Equals('\n')) + 1;
+
+        _bg = OddChild ? "bg-secondary bg-opacity-10 border-secondary" : "bg-white bg-opacity-100 border-primary";
     }
 
     async Task<List<Comment>> GetChildren(string hash)
@@ -128,6 +134,11 @@
     void ShowSource()
     {
         _source = true;
+    }
+
+    void PermaLink()
+    {
+        NavMan.NavigateTo($"/b/{Comment.Post.Board.Name}/comments/{Comment.Post.HashId}/c/{Comment.HashId}", true);
     }
 
     void Cancel()

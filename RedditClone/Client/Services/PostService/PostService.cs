@@ -15,6 +15,14 @@
             return await result.Content.ReadFromJsonAsync<ServiceResponse<Post>>();
         }
 
+        public async Task<ServiceResponse<Post>> EditPostAsync(int postId, string token, string newContent)
+        {
+            var edit = new PostEdit { PostId = postId, UserToken = token, NewContent = newContent };
+
+            var result = await _http.PutAsJsonAsync("api/post", edit);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<Post>>();
+        }
+
         public async Task<ServiceResponse<Post>> GetPostByHashIdAsync(string hashId)
         {
             var result = await _http.GetFromJsonAsync<ServiceResponse<Post>>($"api/post/get/{hashId}");

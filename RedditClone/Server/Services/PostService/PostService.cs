@@ -1,5 +1,6 @@
 ﻿using RedditClone.Server.Services.UserService;
 using RedditClone.Shared;
+using RedditClone.Shared.Models;
 using System;
 
 namespace RedditClone.Server.Services.PostService
@@ -130,6 +131,36 @@ namespace RedditClone.Server.Services.PostService
                 response.Message = $"Post with board name '{name}' not found.";
                 return response;
             }
+
+            response.Data = post;
+            return response;
+        }
+
+        public async Task<ServiceResponse<Post>> EditPostAsync(PostEdit edit)
+        {
+            ServiceResponse<Post> response = new();
+
+            var user = await _userService.GetUserByTokenAsync(edit.UserToken);
+            if (user == null || !user.Success || user.Data == null)
+            {
+                response.Success = false;
+                response.Message = "That user does not exist";
+                return response;
+            }
+
+            var post = await _context.Posts.FindAsync(edit.PostId);
+            if (post == null)
+            {
+                response.Success = false;
+                response.Message = "That post does not exist";
+                return response;
+            }
+
+            post.Content = edit.NewContent;
+            post.Edited = true;
+            post.DateEdited = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
 
             response.Data = post;
             return response;
