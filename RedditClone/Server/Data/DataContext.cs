@@ -1,6 +1,4 @@
-﻿using RedditClone.Shared;
-
-namespace RedditClone.Server.Data
+﻿namespace RedditClone.Server.Data
 {
     public class DataContext : DbContext
     {

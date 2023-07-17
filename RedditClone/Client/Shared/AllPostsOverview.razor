@@ -1,0 +1,30 @@
+﻿@inject IPostService PostService
+
+@if(!_posts.Any())
+{
+
+}
+else
+{
+    int i = 1;
+    foreach(var p in _posts)
+    {
+        <PostElement Post="p" Number="i++" ShowBoardName="true" />
+    }
+}
+
+@code {
+    List<Post> _posts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var posts = await PostService.GetPostsAsync();
+
+        if(posts == null || !posts.Success || posts.Data == null)
+        {
+            return;
+        }
+
+        _posts = posts.Data.OrderByDescending(p => (p.VotesUp - p.VotesDown)).OrderByDescending(p => p.DatePosted).Take(10).ToList();
+    }
+}

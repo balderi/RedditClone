@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RedditClone.Server.Services.CommentService;
 
 namespace RedditClone.Server.Controllers
 {

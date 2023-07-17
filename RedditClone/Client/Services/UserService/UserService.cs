@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace RedditClone.Client.Services.UserService
+﻿namespace RedditClone.Client.Services.UserService
 {
     public class UserService : IUserService
     {

@@ -6,9 +6,7 @@ global using RedditClone.Server.Services.PostService;
 global using RedditClone.Server.Services.CommentService;
 global using RedditClone.Server.Services.UserService;
 global using RedditClone.Server.Services.BoardService;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace RedditClone

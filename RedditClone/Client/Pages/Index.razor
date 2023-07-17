@@ -5,24 +5,7 @@
 
 <PageTitle>Index</PageTitle>
 
-@if(_boards == null)
-{
-    if(string.IsNullOrEmpty(_message))
-    {
-        <p>Loadering...</p>
-    }
-    else
-    {
-        <p>@_message</p>
-    }
-}
-else
-{
-    @foreach(var b in _boards)
-    {
-        <p><a href="/b/@b.Name">@b.Name</a></p>
-    }
-}
+<AllPostsOverview />
 
 <AuthorizeView>
     <Authorized>
@@ -41,7 +24,6 @@ else
     [CascadingParameter]
     public MainLayout Layout { get; set; }
 
-    List<Board> _boards;
     string _message = string.Empty;
     bool _newBoard = false;
     string _buttonText = "New board";
@@ -51,23 +33,6 @@ else
         if(Layout.CurrentBoard != null)
         {
             Layout.CurrentBoard = null;
-        }
-
-        var getBoards = await BoardService.GetBoardsAsync();
-        if(getBoards != null)
-        {
-            if (getBoards.Success && getBoards.Data != null)
-            {
-                _boards = getBoards.Data;
-            }
-            else
-            {
-                _message = getBoards.Message;
-            }
-        }
-        else
-        {
-            _message = "API call failed.";
         }
     }
 

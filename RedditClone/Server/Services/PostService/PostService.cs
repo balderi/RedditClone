@@ -1,7 +1,4 @@
-﻿using RedditClone.Server.Services.UserService;
-using RedditClone.Shared;
-using RedditClone.Shared.Models;
-using System;
+﻿using RedditClone.Shared;
 
 namespace RedditClone.Server.Services.PostService
 {
