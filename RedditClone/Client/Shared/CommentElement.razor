@@ -3,13 +3,14 @@
 @inject IUserService UserService
 @inject ICommentService CommentService
 @inject NavigationManager NavMan
+@inject ILocalStorageService LocalStorage
 
 <details class="p-2 my-3 border border-1 rounded-1 @_bg bg-gradient" open>
     @if(_author != null)
     {
         <summary class="rounded-1 bg-light mb-1 p-1">
             <a href="/u/@_author.Username" class="fw-bold text-decoration-none">@_author.Username</a> 
-            <span class="fw-bold">@(Comment.VotesUp - Comment.VotesDown) points</span> 
+            <span class="fw-bold">@_points @(_points == 1 || _points == -1 ? "point" : "points")</span> 
             <span class="text-muted" title="@Comment.DatePosted.ToLocalTime().ToString("ddd MMM dd yyyy HH:mm:ss UTC zzz")">@Utils.FormatTime(Comment.DatePosted)</span>
             @if(Comment.Edited)
             {
@@ -18,8 +19,8 @@
         </summary>
         <div class="d-flex align-top bg-white rounded-1 p-1">
             <div class="d-inline-flex flex-column">
-                <div class="align-self-start"><span class="oi oi-chevron-top"></span></div>
-                <div class="align-self-end"><span class="oi oi-chevron-bottom"></span></div>
+                <div class="align-self-start"><button class="btn btn-link text-decoration-none @(_voteType == VoteType.Up ? "text-primary" : "text-muted")" type="button" @onclick="UpVote"><span class="oi oi-chevron-top"></span></button></div>
+                <div class="align-self-end"><button class="btn btn-link text-decoration-none @(_voteType == VoteType.Down ? "text-danger" : "text-muted")" type="button" @onclick="DownVote"><span class="oi oi-chevron-bottom"></span></button></div>
             </div>
             <div class="w-100 d-inline-flex flex-column ms-3 mt-2">
                 <div class="d-flex flex-row">
@@ -94,10 +95,12 @@
     List<Comment> _children = new();
 
     bool _replying, _editing, _source;
-    int _lines;
+    int _lines, _points;
     string _bg = string.Empty;
+    string _token = string.Empty;
+    VoteType _voteType = VoteType.None;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
         var getAuthor = await UserService.GetUserByIdAsync(Comment.AuthorId);
         if(getAuthor != null && getAuthor.Success && getAuthor.Data != null)
@@ -105,9 +108,94 @@
             _author = getAuthor.Data;
             _children = await GetChildren(Comment.HashId);
         }
+
+        _token = await LocalStorage.GetItemAsync<string>("authToken");
         _lines = Comment.Content.Count(c => c.Equals('\n')) + 1;
 
         _bg = OddChild ? "bg-secondary bg-opacity-10 border-secondary" : "bg-white bg-opacity-100 border-primary";
+
+        await FetchCommentData();
+    }
+
+    async Task FetchCommentData()
+    {
+        var getComment = await CommentService.GetCommentByHashAsync(Comment.HashId);
+        if (getComment == null || !getComment.Success || getComment.Data == null)
+        {
+            return;
+        }
+
+        Comment = getComment.Data;
+        _points = Comment.Points;
+
+        if (!string.IsNullOrEmpty(_token))
+        {
+            var getVote = await CommentService.GetCommentVoteAsync(new VoteDTO { Token = _token, Hash = Comment.HashId });
+            if (getVote != null && getVote.Success && getVote.Data != null)
+            {
+                _voteType = getVote.Data.VoteType;
+            }
+        }
+    }
+
+    async Task UpVote()
+    {
+        if (string.IsNullOrEmpty(_token))
+        {
+            NavMan.NavigateTo($"/login?returnUrl={NavMan.Uri}");
+            return;
+        }
+
+        if (_voteType == VoteType.Up)
+        {
+            await CommentService.UnVoteCommentAsync(new VoteDTO { Token = _token, Hash = Comment.HashId, Existing = true });
+            _points--;
+            _voteType = VoteType.None;
+        }
+        else if (_voteType == VoteType.Down)
+        {
+            await CommentService.UpVoteCommentAsync(new VoteDTO { Token = _token, Hash = Comment.HashId, Existing = true });
+            _points += 2;
+            _voteType = VoteType.Up;
+        }
+        else
+        {
+            await CommentService.UpVoteCommentAsync(new VoteDTO { Token = _token, Hash = Comment.HashId, Existing = false });
+            _points++;
+            _voteType = VoteType.Up;
+        }
+        await FetchCommentData();
+        StateHasChanged();
+    }
+
+    async Task DownVote()
+    {
+        if (string.IsNullOrEmpty(_token))
+        {
+            NavMan.NavigateTo($"/login?returnUrl={NavMan.Uri}");
+            return;
+        }
+
+        if (_voteType == VoteType.Down)
+        {
+            await CommentService.UnVoteCommentAsync(new VoteDTO { Token = _token, Hash = Comment.HashId, Existing = true });
+            _points++;
+            _voteType = VoteType.None;
+        }
+        else if (_voteType == VoteType.Up)
+        {
+            await CommentService.DownVoteCommentAsync(new VoteDTO { Token = _token, Hash = Comment.HashId, Existing = true });
+            _points -= 2;
+            _voteType = VoteType.Down;
+        }
+        else
+        {
+            await CommentService.DownVoteCommentAsync(new VoteDTO { Token = _token, Hash = Comment.HashId, Existing = false });
+            _points--;
+            _voteType = VoteType.Down;
+        }
+        await FetchCommentData();
+        StateHasChanged();
     }
 
     async Task<List<Comment>> GetChildren(string hash)
@@ -117,6 +205,7 @@
         if (getChildren != null && getChildren.Success && getChildren.Data != null)
         {
             retval = getChildren.Data;
+            retval = retval.OrderByDescending(c => c.Points).ToList();
         }
         return retval;
     }

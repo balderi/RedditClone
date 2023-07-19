@@ -16,7 +16,7 @@
                 </span>
                 <AuthorizeView>
                     <Authorized>
-                        <a href="/profile" class="btn btn-primary"><span class="oi oi-person"> </span> @context.User.Identity.Name</a>
+                        <a href="/profile" class="btn btn-primary"><span class="oi oi-person me-1"> </span> @context.User.Identity.Name</a>
                         <button class="btn btn-outline-danger mx-3" @onclick="Logout">Logout</button>
                     </Authorized>
                     <NotAuthorized>

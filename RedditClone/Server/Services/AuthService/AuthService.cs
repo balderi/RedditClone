@@ -69,7 +69,7 @@ namespace RedditClone.Server.Services.AuthService
 
         public async Task<ServiceResponse<int>> RegisterAsync(UserRegister userRegister)
         {
-            if (await UserExists(userRegister.Email))
+            if (await UserExists(userRegister))
             {
                 return new ServiceResponse<int>
                 {
@@ -92,14 +92,11 @@ namespace RedditClone.Server.Services.AuthService
             return new ServiceResponse<int> { Data = user.Id, Message = "Registration successful!" };
         }
 
-        public async Task<bool> UserExists(string email)
+        public async Task<bool> UserExists(UserRegister user)
         {
-            if (await _context.Users.AnyAsync(u => u.Email.ToLower() == email.ToLower()))
-            {
-                return true;
-            }
-
-            return false;
+            return await _context.Users.AnyAsync(u =>
+                u.Username.ToLower() == user.Username.ToLower() ||
+                u.Email.ToLower() == user.Email.ToLower());
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
@@ -125,8 +122,10 @@ namespace RedditClone.Server.Services.AuthService
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.Hash, user.Guid.ToString())
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));

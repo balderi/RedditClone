@@ -9,5 +9,9 @@
         Task<ServiceResponse<List<Post>>> GetPostsByAuthorAsync(Guid guid);
         Task<ServiceResponse<List<Post>>> GetPostsByBoardGuidAsync(Guid guid);
         Task<ServiceResponse<List<Post>>> GetPostsByBoardNameAsync(string name);
+        Task<ServiceResponse<SubmissionVote>> UpVotePostAsync(VoteDTO vote);
+        Task<ServiceResponse<SubmissionVote>> DownVotePostAsync(VoteDTO vote);
+        Task<ServiceResponse<bool>> UnVotePostAsync(VoteDTO vote);
+        Task<ServiceResponse<SubmissionVote>> GetPostVoteAsync(VoteDTO vote);
     }
 }

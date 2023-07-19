@@ -1,4 +1,6 @@
-﻿namespace RedditClone.Client.Services.CommentService
+﻿using RedditClone.Shared.Models;
+
+namespace RedditClone.Client.Services.CommentService
 {
     public class CommentService : ICommentService
     {
@@ -50,6 +52,30 @@
             var edit = new CommentEdit { CommentId = commentId, UserToken = token, NewContent = newContent };
             var result = await _http.PutAsJsonAsync("api/comment", edit);
             return await result.Content.ReadFromJsonAsync<ServiceResponse<Comment>>();
+        }
+
+        public async Task<ServiceResponse<SubmissionVote>> GetCommentVoteAsync(VoteDTO vote)
+        {
+            var result = await _http.PostAsJsonAsync("api/comment/vote/get", vote);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<SubmissionVote>>();
+        }
+
+        public async Task<ServiceResponse<SubmissionVote>> UpVoteCommentAsync(VoteDTO vote)
+        {
+            var result = await _http.PostAsJsonAsync("api/comment/vote/up", vote);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<SubmissionVote>>();
+        }
+
+        public async Task<ServiceResponse<SubmissionVote>> DownVoteCommentAsync(VoteDTO vote)
+        {
+            var result = await _http.PostAsJsonAsync("api/comment/vote/down", vote);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<SubmissionVote>>();
+        }
+
+        public async Task<ServiceResponse<bool>> UnVoteCommentAsync(VoteDTO vote)
+        {
+            var result = await _http.PostAsJsonAsync("api/comment/vote/remove", vote);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
         }
     }
 }

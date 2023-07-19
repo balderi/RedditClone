@@ -1,5 +1,8 @@
 ﻿@inject ICommentService CommentService
+@inject IPostService PostService
 @inject IUserService UserService
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavMan
 
 @if(Post == null)
 {
@@ -20,15 +23,18 @@
 }
 else
 {
-    <div class="d-flex align-items-center">
-        <div class="d-flex flex-column h-100 m-2"><h3 class="m-0 p-0 text-muted">@Number</h3></div>
-        <div class="d-inline-flex flex-column m-3">
-            <div class="fs-6 align-self-center"><span class="oi oi-chevron-top"></span></div>
-            <div class="fs-3 align-self-center">@_points</div>
-            <div class="fs-6"><span class="oi oi-chevron-bottom"></span></div>
+    <div class="d-flex align-items-center my-3">
+        @if(ShowNumber)
+        {
+            <div class="d-flex flex-column h-100 m-3"><h3 class="m-0 p-0 text-muted">@Number</h3></div>
+        }
+        <div class="d-inline-flex flex-column mx-3">
+            <div class="fs-6 align-self-center"><button class="btn btn-link m-0 p-0 text-decoration-none @(_voteType == VoteType.Up ? "text-primary" : "text-muted")" type="button" @onclick="UpVote"><span class="oi oi-chevron-top"></span></button></div>
+            <div class="fs-4 align-self-center text-muted fw-bold">@_points</div>
+            <div class="fs-6"><button class="btn btn-link m-0 p-0 text-decoration-none @(_voteType == VoteType.Down ? "text-danger" : "text-muted")" type="button" @onclick="DownVote"><span class="oi oi-chevron-bottom"></span></button></div>
         </div>
-        <div class="d-flex flex-column h-100 m-2"><span class="border border-1 border-dark rounded-circle oi @_postType fs-2 p-4"></span></div>
-        <div class="d-flex flex-column h-100 m-2 flex-fill">
+        <div class="d-flex flex-column h-100 mx-3 text-muted"><span class="border border-1 border-dark rounded-circle oi @_postType fs-2 p-4"></span></div>
+        <div class="d-flex flex-column h-100 mx-3 flex-fill">
             <div class="d-flex align-top"><a href="@_link" class="fs-4 text-decoration-none">@Post.Title</a> <span class="text-muted ms-2 align-self-center">(@_baseLink)</span> <span class="m-auto ms-2 badge bg-secondary">Tag</span></div>
             <div class="d-flex align-bottom">
                 <div class="d-flex flex-column align-top">
@@ -37,7 +43,7 @@ else
                         Submitted <span title="@Post.DatePosted">@Utils.FormatTime(Post.DatePosted)</span> by <a href="/u/@_author.Username">@_author.Username</a>
                         @if(ShowBoardName)
                         {
-                            <span> in <a href="/b/@Post.Board.Name">@Post.Board.Name</a></span>
+                            <span> to <a href="/b/@Post.Board.Name">@Post.Board.Name</a></span>
                         }
                     </div>
                     <div>
@@ -61,14 +67,20 @@ else
     public int Number { get; set; }
     [Parameter]
     public bool ShowBoardName { get; set; }
+    [Parameter]
+    public bool ShowNumber { get; set; } = true;
     int _commentCount, _points;
     string _link = string.Empty;
     string _baseLink = string.Empty;
     string _commentLink = string.Empty;
     string _postType = "oi-copywriting";
+    string _token = string.Empty;
+    string _modal = "hidden";
+    bool _modalVisible = false;
     User _author = new User { Username = "Loading..." };
+    VoteType _voteType = VoteType.None;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
         var getCount = await CommentService.CountCommentsByPostHashAsync(Post.HashId);
         if(getCount != null && getCount.Success)
@@ -76,10 +88,12 @@ else
             _commentCount = getCount.Data;
         }
 
-        _points = Post.VotesUp - Post.VotesDown;
+        _token = await LocalStorage.GetItemAsync<string>("authToken");
         _commentLink = $"/b/{Post.Board.Name}/comments/{Post.HashId}";
         _link = string.IsNullOrEmpty(Post.Link) ? _commentLink : Post.Link;
         _postType = string.IsNullOrEmpty(Post.Link) ? "oi-copywriting" : "oi-link-intact";
+
+        await FetchPostData();
 
         var getAuthor = await UserService.GetUserByIdAsync(Post.AuthorId);
         if(getAuthor != null && getAuthor.Success && getAuthor.Data != null)
@@ -97,5 +111,92 @@ else
             _postType = "oi-copywriting";
             _baseLink = $"self.{Post.Board.Name}";
         }
+    }
+
+    async Task FetchPostData()
+    {
+        var getPost = await PostService.GetPostByHashIdAsync(Post.HashId);
+        if(getPost == null || !getPost.Success || getPost.Data == null)
+        {
+            return;
+        }
+
+        Post = getPost.Data;
+        _points = Post.VotesUp - Post.VotesDown;
+
+        if(!string.IsNullOrEmpty(_token))
+        {
+            var getVote = await PostService.GetPostVoteAsync(new VoteDTO { Token = _token, Hash = Post.HashId });
+            if (getVote != null && getVote.Success && getVote.Data != null)
+            {
+                _voteType = getVote.Data.VoteType;
+            }
+        }
+    }
+
+    async Task UpVote()
+    {
+        if (string.IsNullOrEmpty(_token))
+        {
+            NavMan.NavigateTo($"/login?returnUrl={NavMan.Uri}");
+            return;
+        }
+
+        if(_voteType == VoteType.Up)
+        {
+            await PostService.UnVotePostAsync(new VoteDTO { Token = _token, Hash = Post.HashId, Existing = true });
+            _points--;
+            _voteType = VoteType.None;
+        }
+        else if(_voteType == VoteType.Down)
+        {
+            await PostService.UpVotePostAsync(new VoteDTO { Token = _token, Hash = Post.HashId, Existing = true });
+            _points += 2;
+            _voteType = VoteType.Up;
+        }
+        else
+        {
+            await PostService.UpVotePostAsync(new VoteDTO { Token = _token, Hash = Post.HashId, Existing = false });
+            _points++;
+            _voteType = VoteType.Up;
+        }
+        await FetchPostData();
+        StateHasChanged();
+    }
+
+    async Task DownVote()
+    {
+        if (string.IsNullOrEmpty(_token))
+        {
+            NavMan.NavigateTo($"/login?returnUrl={NavMan.Uri}");
+            return;
+        }
+
+        if (_voteType == VoteType.Down)
+        {
+            await PostService.UnVotePostAsync(new VoteDTO { Token = _token, Hash = Post.HashId, Existing = true });
+            _points++;
+            _voteType = VoteType.None;
+        }
+        else if (_voteType == VoteType.Up)
+        {
+            await PostService.DownVotePostAsync(new VoteDTO { Token = _token, Hash = Post.HashId, Existing = true });
+            _points -= 2;
+            _voteType = VoteType.Down;
+        }
+        else
+        {
+            await PostService.DownVotePostAsync(new VoteDTO { Token = _token, Hash = Post.HashId, Existing = false });
+            _points--;
+            _voteType = VoteType.Down;
+        }
+        await FetchPostData();
+        StateHasChanged();
+    }
+
+    void ShowModal()
+    {
+        _modalVisible = !_modalVisible;
+        _modal = _modalVisible ? "" : "hidden";
     }
 }

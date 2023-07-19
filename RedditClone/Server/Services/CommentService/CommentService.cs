@@ -47,6 +47,10 @@ namespace RedditClone.Server.Services.CommentService
             await _context.AddAsync(newComment);
             await _context.SaveChangesAsync();
             newComment.HashId = Hashing.Encode(newComment.Id);
+
+            var vote = new SubmissionVote { UserGuid = user.Data.Guid, SubmissionHash = newComment.HashId, VoteType = Shared.Enums.VoteType.Up };
+            await _context.Votes.AddAsync(vote);
+
             await _context.SaveChangesAsync();
 
             response.Data = newComment;

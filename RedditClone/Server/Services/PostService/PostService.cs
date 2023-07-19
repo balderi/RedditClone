@@ -38,6 +38,10 @@ namespace RedditClone.Server.Services.PostService
             _context.Posts.Add(newPost);
             await _context.SaveChangesAsync();
             newPost.HashId = Hashing.Encode(newPost.Id);
+
+            var vote = new SubmissionVote { UserGuid = user.Data.Guid, SubmissionHash = newPost.HashId, VoteType = Shared.Enums.VoteType.Up };
+            await _context.Votes.AddAsync(vote);
+
             await _context.SaveChangesAsync();
 
             response.Data = newPost;

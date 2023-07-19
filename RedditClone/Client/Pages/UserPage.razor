@@ -8,6 +8,10 @@
 {
     <h3>The user <span class="font-monospace">@UserName</span> does not exist...</h3>
 }
+else if(_user == null)
+{
+    <h3>Loading...</h3>
+}
 else
 {
     <h3>Overview for @UserName</h3>
@@ -23,7 +27,7 @@ else
         {
             if(s is Post)
             {
-                <PostElement Post="s as Post" />
+                <PostElement Post="s as Post" ShowBoardName="true" ShowNumber="false" />
             }
             if(s is Comment)
             {
@@ -42,7 +46,7 @@ else
     [Parameter]
     public string UserName { get; set; } = string.Empty;
 
-    User _user = new();
+    User? _user;
     List<Post> _posts = new();
     List<Comment> _comments = new();
     List<ISubmission> _submissions = new();

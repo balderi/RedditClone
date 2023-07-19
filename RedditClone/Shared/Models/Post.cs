@@ -20,5 +20,7 @@ namespace RedditClone.Shared.Models
         public DateTime DateEdited { get; set; }
         public int VotesUp { get; set; }
         public int VotesDown { get; set; }
+
+        public int Points => VotesUp - VotesDown;
     }
 }

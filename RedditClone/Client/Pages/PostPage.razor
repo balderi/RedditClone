@@ -51,12 +51,12 @@
         <div class="d-flex mb-3">
             <div class="d-flex align-items-start">
                 <div class="d-inline-flex flex-column">
-                    <div class="fs-6"><span class="oi oi-chevron-top"></span></div>
-                    <div class="fs-3">@_points</div>
-                    <div class="fs-6"><span class="oi oi-chevron-bottom"></span></div>
+                    <div class="fs-6 align-self-center"><button class="btn btn-link m-0 p-0 text-decoration-none @(_voteType == VoteType.Up ? "text-primary" : "text-muted")" type="button" @onclick="UpVote"><span class="oi oi-chevron-top"></span></button></div>
+                    <div class="fs-4 align-self-center text-muted fw-bold">@_points</div>
+                    <div class="fs-6"><button class="btn btn-link m-0 p-0 text-decoration-none @(_voteType == VoteType.Down ? "text-danger" : "text-muted")" type="button" @onclick="DownVote"><span class="oi oi-chevron-bottom"></span></button></div>
                 </div>
                 <div class="d-inline-flex mx-3">
-                    <span class="border border-1 border-dark rounded-circle oi @_postType fs-2 p-3"></span>
+                    <span class="border border-1 border-dark rounded-circle oi @_postType fs-2 p-3 m-2"></span>
                 </div>
             </div>
             <div class="d-flex flex-column flex-fill">
@@ -77,7 +77,7 @@
                 </div>
                 @if(!string.IsNullOrEmpty(_post.Content))
                 {
-                    <div class="border border-dark border-1 rounded-2 p-2">
+                    <div class="border border-dark border-1 rounded-2 p-2 mb-3">
                         @if (_editing)
                         {
                             <PostEditElement Post="_post" PostAuthor="_author" Cancel="Cancel" />
@@ -99,7 +99,7 @@
                 <div class="d-inline-flex flex-row">
                     @if (_post.Board.Nsfw)
                     {
-                        <span class="me-1 my-auto border border-1 border-danger text-danger rounded-3 p-1" style="font-size:smaller">NSFW</span>
+                        <span class="me-3 my-auto border border-1 border-danger text-danger rounded-3 p-1" style="font-size:smaller">NSFW</span>
                     }
                     <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="PermaLink">@_commentCount @(_commentCount == 1 ? "comment" : "comments")</button>
                     <AuthorizeView>
@@ -184,6 +184,8 @@ else
     string _postType = "oi-copywriting";
     string _baseLink = string.Empty;
     string _link = "#";
+    string _token = string.Empty;
+    VoteType _voteType = VoteType.None;
 
     List<string> _sortValues = new() { "N/A", "None" };
 
@@ -201,49 +203,10 @@ else
             }
         }
 
-        var getPost = await PostService.GetPostByHashIdAsync(PostHash);
-        if (getPost != null && getPost.Success && getPost.Data != null)
+        _token = await LocalStorage.GetItemAsync<string>("authToken");
+        if(!string.IsNullOrEmpty(_token))
         {
-            _post = getPost.Data;
-
-            var getAuthor = await UserService.GetUserByIdAsync(_post.AuthorId);
-            if (getAuthor != null && getAuthor.Success && getAuthor.Data != null)
-            {
-                _author = getAuthor.Data;
-            }
-            if(_singleComment)
-            {
-                var comment = await CommentService.GetCommentByHashAsync(CommentHash);
-                if(comment != null && comment.Success && comment.Data != null)
-                {
-                    _topComments.Add(comment.Data);
-                }
-            }
-            else
-            {
-                var getComments = await CommentService.GetCommentsByPostHashAsync(PostHash);
-                if (getComments != null && getComments.Success && getComments.Data != null)
-                {
-                    _topComments = getComments.Data;
-                }
-            }
-
-            var getCount = await CommentService.CountCommentsByPostHashAsync(PostHash);
-            if (getCount != null && getCount.Success)
-            {
-                _commentCount = getCount.Data;
-            }
-
-            _points = _post.VotesUp - _post.VotesDown;
-        }
-        else
-        {
-            _postExists = false;
-        }
-        var token = await LocalStorage.GetItemAsync<string>("authToken");
-        if(!string.IsNullOrEmpty(token))
-        {
-            var user = await UserService.GetUserByTokenAsync(token);
+            var user = await UserService.GetUserByTokenAsync(_token);
             if (user != null)
             {
                 if (user.Success && user.Data != null)
@@ -252,6 +215,8 @@ else
                 }
             }
         }
+
+        await FetchPostData();
 
         if (!string.IsNullOrEmpty(_post.Link))
         {
@@ -267,6 +232,119 @@ else
         }
 
         _lines = _post.Content.Count(c => c.Equals('\n')) + 1;
+    }
+
+    async Task FetchPostData()
+    {
+        var getPost = await PostService.GetPostByHashIdAsync(PostHash);
+        if (getPost != null && getPost.Success && getPost.Data != null)
+        {
+            _post = getPost.Data;
+
+            var getAuthor = await UserService.GetUserByIdAsync(_post.AuthorId);
+            if (getAuthor != null && getAuthor.Success && getAuthor.Data != null)
+            {
+                _author = getAuthor.Data;
+            }
+            if (_singleComment)
+            {
+                var comment = await CommentService.GetCommentByHashAsync(CommentHash);
+                if (comment != null && comment.Success && comment.Data != null)
+                {
+                    _topComments.Add(comment.Data);
+                }
+            }
+            else
+            {
+                var getComments = await CommentService.GetCommentsByPostHashAsync(PostHash);
+                if (getComments != null && getComments.Success && getComments.Data != null)
+                {
+                    _topComments = getComments.Data;
+                    _topComments = _topComments.OrderByDescending(c => c.Points).ToList();
+                }
+            }
+
+            var getCount = await CommentService.CountCommentsByPostHashAsync(PostHash);
+            if (getCount != null && getCount.Success)
+            {
+                _commentCount = getCount.Data;
+            }
+
+            _points = _post.Points;
+        }
+        else
+        {
+            _postExists = false;
+        }
+
+        if (!string.IsNullOrEmpty(_token))
+        {
+            var getVote = await PostService.GetPostVoteAsync(new VoteDTO { Token = _token, Hash = _post.HashId });
+            if (getVote != null && getVote.Success && getVote.Data != null)
+            {
+                _voteType = getVote.Data.VoteType;
+            }
+        }
+    }
+
+    async Task UpVote()
+    {
+        if(string.IsNullOrEmpty(_token))
+        {
+            NavMan.NavigateTo($"/login?returnUrl={NavMan.Uri}");
+            return;
+        }
+
+        if (_voteType == VoteType.Up)
+        {
+            await PostService.UnVotePostAsync(new VoteDTO { Token = _token, Hash = _post.HashId, Existing = true });
+            _points--;
+            _voteType = VoteType.None;
+        }
+        else if (_voteType == VoteType.Down)
+        {
+            await PostService.UpVotePostAsync(new VoteDTO { Token = _token, Hash = _post.HashId, Existing = true });
+            _points += 2;
+            _voteType = VoteType.Up;
+        }
+        else
+        {
+            await PostService.UpVotePostAsync(new VoteDTO { Token = _token, Hash = _post.HashId, Existing = false });
+            _points++;
+            _voteType = VoteType.Up;
+        }
+        await FetchPostData();
+        StateHasChanged();
+    }
+
+    async Task DownVote()
+    {
+        if(string.IsNullOrEmpty(_token))
+        {
+            NavMan.NavigateTo($"/login?returnUrl={NavMan.Uri}");
+            return;
+        }
+
+        if (_voteType == VoteType.Down)
+        {
+            await PostService.UnVotePostAsync(new VoteDTO { Token = _token, Hash = _post.HashId, Existing = true });
+            _points++;
+            _voteType = VoteType.None;
+        }
+        else if (_voteType == VoteType.Up)
+        {
+            await PostService.DownVotePostAsync(new VoteDTO { Token = _token, Hash = _post.HashId, Existing = true });
+            _points -= 2;
+            _voteType = VoteType.Down;
+        }
+        else
+        {
+            await PostService.DownVotePostAsync(new VoteDTO { Token = _token, Hash = _post.HashId, Existing = false });
+            _points--;
+            _voteType = VoteType.Down;
+        }
+        await FetchPostData();
+        StateHasChanged();
     }
 
     void OnSelected()

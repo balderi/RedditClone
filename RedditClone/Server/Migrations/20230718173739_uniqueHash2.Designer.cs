@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RedditClone.Server.Data;
 
@@ -11,9 +12,10 @@ using RedditClone.Server.Data;
 namespace RedditClone.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230718173739_uniqueHash2")]
+    partial class uniqueHash2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,7 +88,8 @@ namespace RedditClone.Server.Migrations
 
                     b.Property<string>("HashId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Hidden")
                         .HasColumnType("bit");
@@ -104,9 +107,6 @@ namespace RedditClone.Server.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("HashId")
-                        .IsUnique();
 
                     b.HasIndex("PostId");
 
@@ -145,7 +145,8 @@ namespace RedditClone.Server.Migrations
 
                     b.Property<string>("HashId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Hidden")
                         .HasColumnType("bit");
@@ -170,9 +171,6 @@ namespace RedditClone.Server.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BoardId");
-
-                    b.HasIndex("HashId")
-                        .IsUnique();
 
                     b.ToTable("Posts");
                 });

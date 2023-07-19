@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RedditClone.Server.Migrations;
+using RedditClone.Shared.Enums;
 
 namespace RedditClone.Server.Controllers
 {
@@ -8,10 +10,12 @@ namespace RedditClone.Server.Controllers
     public class CommentController : ControllerBase
     {
         private readonly ICommentService _commentService;
+        private readonly IVoteService _voteService;
 
-        public CommentController(ICommentService commentService)
+        public CommentController(ICommentService commentService, IVoteService voteService)
         {
             _commentService = commentService;
+            _voteService = voteService;
         }
 
         [HttpGet("get/{hash}")]
@@ -60,6 +64,36 @@ namespace RedditClone.Server.Controllers
         public async Task<ActionResult<ServiceResponse<Comment>>> EditCommentAsync(CommentEdit edit)
         {
             var response = await _commentService.EditCommentAsync(edit);
+            return Ok(response);
+        }
+
+        [HttpPost("vote/get")]
+        public async Task<ActionResult<ServiceResponse<SubmissionVote>>> GetCommentVoteAsync(VoteDTO vote)
+        {
+            var response = await _voteService.GetSubmissionVoteAsync(vote, VoteKind.Comment);
+            return Ok(response);
+        }
+
+        [HttpPost("vote/up"), Authorize]
+        public async Task<ActionResult<ServiceResponse<SubmissionVote>>> UpVoteCommentAsync(VoteDTO vote)
+        {
+            var response = vote.Existing ? await _voteService.EditSubmissionVoteAsync(vote, VoteType.Up, VoteKind.Comment)
+                : await _voteService.AddSubmissionVoteAsync(vote, VoteType.Up, VoteKind.Comment);
+            return Ok(response);
+        }
+
+        [HttpPost("vote/down"), Authorize]
+        public async Task<ActionResult<ServiceResponse<SubmissionVote>>> DownVoteCommentAsync(VoteDTO vote)
+        {
+            var response = vote.Existing ? await _voteService.EditSubmissionVoteAsync(vote, VoteType.Down, VoteKind.Comment)
+                : await _voteService.AddSubmissionVoteAsync(vote, VoteType.Down, VoteKind.Comment);
+            return Ok(response);
+        }
+
+        [HttpPost("vote/remove"), Authorize]
+        public async Task<ActionResult<ServiceResponse<bool>>> UnVoteCommentAsync(VoteDTO vote)
+        {
+            var response = await _voteService.RemoveSubmissionVoteAsync(vote, VoteKind.Comment);
             return Ok(response);
         }
     }

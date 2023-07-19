@@ -52,5 +52,29 @@
             var result = await _http.GetFromJsonAsync<ServiceResponse<List<Post>>>($"api/post/get/board/{name}");
             return result;
         }
+
+        public async Task<ServiceResponse<SubmissionVote>> GetPostVoteAsync(VoteDTO vote)
+        {
+            var result = await _http.PostAsJsonAsync("api/post/vote/get", vote);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<SubmissionVote>>();
+        }
+
+        public async Task<ServiceResponse<SubmissionVote>> UpVotePostAsync(VoteDTO vote)
+        {
+            var result = await _http.PostAsJsonAsync("api/post/vote/up", vote);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<SubmissionVote>>();
+        }
+
+        public async Task<ServiceResponse<SubmissionVote>> DownVotePostAsync(VoteDTO vote)
+        {
+            var result = await _http.PostAsJsonAsync("api/post/vote/down", vote);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<SubmissionVote>>();
+        }
+
+        public async Task<ServiceResponse<bool>> UnVotePostAsync(VoteDTO vote)
+        {
+            var result = await _http.PostAsJsonAsync("api/post/vote/remove", vote);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
+        }
     }
 }

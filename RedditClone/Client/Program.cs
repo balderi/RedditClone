@@ -2,6 +2,7 @@ global using System.Net.Http.Json;
 global using Microsoft.AspNetCore.Components.Authorization;
 global using RedditClone.Shared;
 global using RedditClone.Shared.Models;
+global using RedditClone.Shared.Enums;
 global using RedditClone.Client.Services.AuthService;
 global using RedditClone.Client.Services.UserService;
 global using RedditClone.Client.Services.BoardService;

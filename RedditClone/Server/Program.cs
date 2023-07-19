@@ -6,6 +6,7 @@ global using RedditClone.Server.Services.PostService;
 global using RedditClone.Server.Services.CommentService;
 global using RedditClone.Server.Services.UserService;
 global using RedditClone.Server.Services.BoardService;
+global using RedditClone.Server.Services.VoteService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -35,6 +36,7 @@ namespace RedditClone
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IBoardService, BoardService>();
+            builder.Services.AddScoped<IVoteService, VoteService>();
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
