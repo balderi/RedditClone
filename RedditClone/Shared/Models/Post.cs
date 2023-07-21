@@ -22,5 +22,10 @@ namespace RedditClone.Shared.Models
         public int VotesDown { get; set; }
 
         public int Points => VotesUp - VotesDown;
+
+        public override string ToString()
+        {
+            return Title;
+        }
     }
 }

@@ -33,7 +33,7 @@ namespace RedditClone.Server.Services.CommentService
                 return response;
             }
 
-            Comment newComment = new Comment { Content = comment.Content, AuthorId = user.Data.Id, Post = post.Data };
+            Comment newComment = new Comment { Content = comment.Content, AuthorId = user.Data.Id, Post = post.Data, VotesUp = 1 };
 
             if (!string.IsNullOrEmpty(comment.ParentHash))
             {
@@ -77,6 +77,20 @@ namespace RedditClone.Server.Services.CommentService
                 return response;
             }
             response.Data = comments.Count();
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<Comment>>> GetCommentsAsync()
+        {
+            var response = new ServiceResponse<List<Comment>>();
+            var comments = await _context.Comments.Include(c => c.Post).ThenInclude(p => p.Board).ThenInclude(b => b.Owner).ToListAsync();
+            if (comments == null)
+            {
+                response.Success = false;
+                response.Message = $"We're sorry; something happened.";
+                return response;
+            }
+            response.Data = comments;
             return response;
         }
 

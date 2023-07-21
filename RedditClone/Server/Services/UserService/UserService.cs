@@ -9,6 +9,20 @@
             _context = context;
         }
 
+        public async Task<ServiceResponse<List<User>>> GetUsersAsync()
+        {
+            ServiceResponse<List<User>> response = new();
+            var users = await _context.Users.ToListAsync();
+            if (users == null)
+            {
+                response.Success = false;
+                response.Message = $"We're sorry; something happened.";
+                return response;
+            }
+            response.Data = users;
+            return response;
+        }
+
         public async Task<ServiceResponse<User>> GetUserByEmailAsync(string email)
         {
             ServiceResponse<User> response = new();

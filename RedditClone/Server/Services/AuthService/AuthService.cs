@@ -77,7 +77,17 @@ namespace RedditClone.Server.Services.AuthService
                     Message = "User already exists."
                 };
             }
-            var user = new User { Email = userRegister.Email, Username = userRegister.Email.Split('@')[0].Trim() };
+
+            if(userRegister.Password.Length < 6)
+            {
+                return new ServiceResponse<int>
+                {
+                    Success = false,
+                    Message = "Password too short."
+                };
+            }
+
+            var user = new User { Email = userRegister.Email, Username = userRegister.Username };
 
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();

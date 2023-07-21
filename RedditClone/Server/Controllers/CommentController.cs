@@ -18,6 +18,13 @@ namespace RedditClone.Server.Controllers
             _voteService = voteService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<ServiceResponse<Comment>>> GetCommentsAsync()
+        {
+            var response = await _commentService.GetCommentsAsync();
+            return Ok(response);
+        }
+
         [HttpGet("get/{hash}")]
         public async Task<ActionResult<ServiceResponse<Comment>>> GetCommentByHashAsync(string hash)
         {

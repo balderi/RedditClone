@@ -9,6 +9,12 @@
             _http = http;
         }
 
+        public async Task<ServiceResponse<List<User>>> GetUsersAsync()
+        {
+            var result = await _http.GetFromJsonAsync<ServiceResponse<List<User>>>($"api/user/get");
+            return result;
+        }
+
         public async Task<ServiceResponse<User>> GetUserByEmailAsync(string email)
         {
             var result = await _http.GetFromJsonAsync<ServiceResponse<User>>($"api/user/get/email/{email}");

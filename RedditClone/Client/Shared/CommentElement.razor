@@ -5,12 +5,16 @@
 @inject NavigationManager NavMan
 @inject ILocalStorageService LocalStorage
 
-<details class="p-2 my-3 border border-1 rounded-1 @_bg bg-gradient" open>
+<details class="p-2 my-3 border border-1 rounded-1 @_bg bg-gradient" open=@_open>
     @if(_author != null)
     {
         <summary class="rounded-1 bg-light mb-1 p-1">
-            <a href="/u/@_author.Username" class="fw-bold text-decoration-none">@_author.Username</a> 
-            <span class="fw-bold">@_points @(_points == 1 || _points == -1 ? "point" : "points")</span> 
+            <a href="/u/@_author.Username" class="fw-bold text-decoration-none">@_author.Username</a>
+            <span class="fw-bold">@_points @(_points == 1 || _points == -1 ? "point" : "points")</span>
+            @if(!_open)
+            {
+                <span class="text-muted fst-italic mx-2">comment score below threshold</span>
+            }
             <span class="text-muted" title="@Comment.DatePosted.ToLocalTime().ToString("ddd MMM dd yyyy HH:mm:ss UTC zzz")">@Utils.FormatTime(Comment.DatePosted)</span>
             @if(Comment.Edited)
             {
@@ -68,7 +72,7 @@
         {
             foreach(var c in _children)
             {
-                <CommentElement Comment="c" OddChild="!OddChild"></CommentElement>
+                <CommentElement Comment="c" OddChild="!OddChild" CollapseLowScore="CollapseLowScore"></CommentElement>
             }
         }
     }
@@ -91,13 +95,17 @@
     [Parameter]
     public bool OddChild { get; set; }
 
+    [Parameter]
+    public bool CollapseLowScore { get; set; }
+
     User _author = new User { Username = "Loading..." };
     List<Comment> _children = new();
 
-    bool _replying, _editing, _source;
+    bool _replying, _editing, _source, _open;
     int _lines, _points;
     string _bg = string.Empty;
     string _token = string.Empty;
+    string _collapse = "true";
     VoteType _voteType = VoteType.None;
 
     protected override async Task OnInitializedAsync()
@@ -115,6 +123,8 @@
         _bg = OddChild ? "bg-secondary bg-opacity-10 border-secondary" : "bg-white bg-opacity-100 border-primary";
 
         await FetchCommentData();
+
+        _open = !CollapseLowScore || _points > 0;
     }
 
     async Task FetchCommentData()

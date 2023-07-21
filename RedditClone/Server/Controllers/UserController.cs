@@ -13,6 +13,13 @@ namespace RedditClone.Server.Controllers
             _userService = userService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<ServiceResponse<List<User>>>> GetUsersAsync()
+        {
+            var response = await _userService.GetUsersAsync();
+            return Ok(response);
+        }
+
         [HttpGet("get/id/{id:int}")]
         public async Task<ActionResult<ServiceResponse<User>>> GetUserByIdAsync(int id)
         {

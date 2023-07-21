@@ -29,6 +29,12 @@ namespace RedditClone.Client.Services.CommentService
             return result;
         }
 
+        public async Task<ServiceResponse<List<Comment>>> GetCommentsAsync()
+        {
+            var result = await _http.GetFromJsonAsync<ServiceResponse<List<Comment>>>($"api/comment");
+            return result;
+        }
+
         public async Task<ServiceResponse<List<Comment>>> GetCommentsByParentHashAsync(string parentHash)
         {
             var result = await _http.GetFromJsonAsync<ServiceResponse<List<Comment>>>($"api/comment/get/parent/{parentHash}");

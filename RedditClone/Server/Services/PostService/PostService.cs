@@ -34,7 +34,7 @@ namespace RedditClone.Server.Services.PostService
                 return response;
             }
 
-            Post newPost = new Post { Title = post.Title, Content = post.Content, Link = post.Link, AuthorId = user.Data.Id, Board = board.Data };
+            Post newPost = new Post { Title = post.Title, Content = post.Content, Link = post.Link, AuthorId = user.Data.Id, Board = board.Data, VotesUp = 1 };
             _context.Posts.Add(newPost);
             await _context.SaveChangesAsync();
             newPost.HashId = Hashing.Encode(newPost.Id);

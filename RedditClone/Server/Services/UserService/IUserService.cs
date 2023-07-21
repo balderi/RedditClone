@@ -2,6 +2,7 @@
 {
     public interface IUserService
     {
+        Task<ServiceResponse<List<User>>> GetUsersAsync();
         Task<ServiceResponse<User>> GetUserByIdAsync(int id);
         Task<ServiceResponse<User>> GetUserByGuidAsync(Guid guid);
         Task<ServiceResponse<User>> GetUserByEmailAsync(string email);

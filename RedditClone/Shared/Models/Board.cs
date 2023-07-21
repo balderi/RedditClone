@@ -12,5 +12,10 @@ namespace RedditClone.Shared.Models
         public User Owner { get; set; }
         public bool Nsfw { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

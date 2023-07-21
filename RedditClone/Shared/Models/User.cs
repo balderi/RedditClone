@@ -8,5 +8,10 @@
         public string Username { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public string Role { get; set; } = "User";
+
+        public override string ToString()
+        {
+            return Username;
+        }
     }
 }
