@@ -6,5 +6,6 @@
         Task<ServiceResponse<Board>> GetBoardByGuidAsync(Guid guid);
         Task<ServiceResponse<List<Board>>> GetBoardsAsync();
         Task<ServiceResponse<Board>> AddBoardAsync(BoardNew board);
+        Task<ServiceResponse<List<string>>> GetBoardSearchSuggestionsAsync(string queryText);
     }
 }

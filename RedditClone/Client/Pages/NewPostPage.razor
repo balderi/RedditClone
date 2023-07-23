@@ -1,0 +1,68 @@
+﻿@inject IPostService PostService
+@inject NavigationManager NavMan
+
+@page "/new-post"
+
+<h3>Submit a new post</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <EditForm Context="post" Model="_model" OnValidSubmit="OnSubmit">
+        <DataAnnotationsValidator />
+        <div class="mb-3">
+            <label for="postTitle" class="form-label">Title</label>
+            <InputText class="form-control" id="postTitle" @bind-Value="_model.Title"></InputText>
+            <ValidationMessage For="() => _model.Title" />
+        </div>
+        <div class="mb-3">
+            <label for="postLink" class="form-label">Link</label>
+            <InputText class="form-control" id="postLink" @bind-Value="_model.Link"></InputText>
+        </div>
+        <div class="mb-3">
+            <label for="postContent" class="form-label">Content</label>
+            <InputTextArea class="form-control" id="postContent" @bind-Value="_model.Content"></InputTextArea>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            Submit
+        </button>
+    </EditForm>
+    <p>@_message</p>
+    </Authorized>
+    <NotAuthorized >
+        <p>Please <a href="/login?returnurl=@NavMan.Uri">sign in</a> or <a href="/register">sign up</a> to post.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public Board? Board { get; set; }
+
+    PostNew _model = new PostNew();
+    string _message = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    async Task OnSubmit()
+    {
+        var result = await PostService.AddPostAsync(_model);
+        if (result != null)
+        {
+            if (result.Success && result.Data != null)
+            {
+                _message = "Post added!";
+                NavMan.NavigateTo(NavMan.Uri + "/comments/" + result.Data.HashId, true);
+            }
+            else
+            {
+                _message = result.Message;
+            }
+        }
+        else
+        {
+            _message = "API call failed";
+        }
+    }
+}

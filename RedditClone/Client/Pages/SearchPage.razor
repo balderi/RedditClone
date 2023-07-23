@@ -1,0 +1,12 @@
+﻿@page "/search/{Query}"
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager NavMan
+
+<h3>Search</h3>
+
+<p>Search query: @Query</p>
+
+@code {
+    [Parameter]
+    public string Query { get; set; } = string.Empty;
+}

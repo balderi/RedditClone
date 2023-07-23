@@ -75,5 +75,22 @@ namespace RedditClone.Server.Services.BoardService
             response.Data = boards;
             return response;
         }
+
+        public async Task<ServiceResponse<List<string>>> GetBoardSearchSuggestionsAsync(string queryText)
+        {
+            var retval = new List<string>();
+
+            var boards = await _context.Boards.Where(b => 
+                b.Name.ToLower().Contains(queryText.ToLower()) || 
+                b.Description.ToLower().Contains(queryText.ToLower())
+            ).ToListAsync();
+
+            foreach(var board in boards)
+            {
+                retval.Add(board.Name);
+            }
+
+            return new ServiceResponse<List<string>> { Data = retval };
+        }
     }
 }

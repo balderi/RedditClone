@@ -1,6 +1,6 @@
 ﻿@inject ILocalStorageService LocalStorage
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavMan
 @inherits LayoutComponentBase
 
 <CascadingValue Value="this">
@@ -8,7 +8,7 @@
         <main class="d-flex flex-column align-items-center">
             <div class="top-row px-4 w-100 shadow">
                 <span class="d-flex align-self-start me-auto ms-0">
-                    <a class="d-inline-flex align-items-end ms-0" href="/"><h1 class="m-0 p-0 mt-2 align-bottom">Title</h1></a>
+                    <a class="d-inline-flex align-items-end ms-0" href="/"><h1 class="m-0 p-0 mt-1 align-bottom">Title</h1></a>
                     @if(_currentBoard != null)
                     {
                         <a class="d-inline-flex align-items-end" href="/b/@_currentBoard.Name"><h2 class="m-0 p-0 mb-2 fs-6 fw-bold">@_currentBoard.Name</h2></a>
@@ -20,13 +20,14 @@
                         <button class="btn btn-outline-danger mx-3" @onclick="Logout">Logout</button>
                     </Authorized>
                     <NotAuthorized>
-                        <a href="/login?returnUrl=@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)" class="btn btn-primary">Login</a> 
+                        <a href="/login?returnUrl=@NavMan.ToBaseRelativePath(NavMan.Uri)" class="btn btn-primary">Login</a>
                         <a href="/register" class="btn btn-outline-primary">Register</a> 
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
 
             <article class="content px-4 w-100 mb-auto">
+                <SideBar CurrentBoard="_currentBoard" />
                 @Body
             </article>
             <footer class="mt-5">
@@ -54,6 +55,6 @@
     {
         await LocalStorage.RemoveItemAsync("authToken");
         await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        NavigationManager.NavigateTo("");
+        NavMan.NavigateTo("");
     }
 }

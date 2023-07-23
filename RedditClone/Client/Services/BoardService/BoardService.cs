@@ -32,5 +32,11 @@
             var result = await _http.GetFromJsonAsync<ServiceResponse<List<Board>>>("api/board/get");
             return result;
         }
+
+        public async Task<ServiceResponse<List<string>>> GetBoardSearchSuggestionsAsync(string queryText)
+        {
+            var result = await _http.GetFromJsonAsync<ServiceResponse<List<string>>>($"api/board/query/{queryText}");
+            return result;
+        }
     }
 }

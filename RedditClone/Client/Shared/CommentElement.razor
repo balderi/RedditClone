@@ -5,86 +5,88 @@
 @inject NavigationManager NavMan
 @inject ILocalStorageService LocalStorage
 
-<details class="p-2 my-3 border border-1 rounded-1 @_bg bg-gradient" open=@_open>
-    @if(_author != null)
-    {
-        <summary class="rounded-1 bg-light mb-1 p-1">
-            <a href="/u/@_author.Username" class="fw-bold text-decoration-none">@_author.Username</a>
-            <span class="fw-bold">@_points @(_points == 1 || _points == -1 ? "point" : "points")</span>
-            @if(!_open)
-            {
-                <span class="text-muted fst-italic mx-2">comment score below threshold</span>
-            }
-            <span class="text-muted" title="@Comment.DatePosted.ToLocalTime().ToString("ddd MMM dd yyyy HH:mm:ss UTC zzz")">@Utils.FormatTime(Comment.DatePosted)</span>
-            @if(Comment.Edited)
-            {
-                <span class="text-muted" title="@Comment.DateEdited.ToLocalTime().ToString("ddd MMM dd yyyy HH:mm:ss UTC zzz")">* (last edited @Utils.FormatTime(Comment.DateEdited))</span>
-            }
-        </summary>
-        <div class="d-flex align-top bg-white rounded-1 p-1">
-            <div class="d-inline-flex flex-column">
-                <div class="align-self-start"><button class="btn btn-link text-decoration-none @(_voteType == VoteType.Up ? "text-primary" : "text-muted")" type="button" @onclick="UpVote"><span class="oi oi-chevron-top"></span></button></div>
-                <div class="align-self-end"><button class="btn btn-link text-decoration-none @(_voteType == VoteType.Down ? "text-danger" : "text-muted")" type="button" @onclick="DownVote"><span class="oi oi-chevron-bottom"></span></button></div>
-            </div>
-            <div class="w-100 d-inline-flex flex-column ms-3 mt-2">
-                <div class="d-flex flex-row">
-
-                @if (_editing)
-                {
-                        <CommentEditElement Comment="Comment" Cancel="Cancel" CommentAuthor="_author" />
-                }
-                else if(_source)
-                {
-                    <form class="w-100">
-                        <textarea class="form-control" value="@Comment.Content" rows="@_lines" readonly></textarea>
-                        <button type="button" class="btn btn-primary my-3" @onclick="Cancel"><span class="oi oi-circle-x"> </span> Close</button>
-                    </form>
-                }
-                else
-                {
-                    <span class="mb-2">@((MarkupString)Markdig.Markdown.ToHtml(Comment.Content).Replace("<p>", "<p  class=\"mb-1\">"))</span>
-                }
-                </div>
-                <div class="d-inline-flex flex-row">
-                    <AuthorizeView>
-                        <Authorized>
-                            <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Replying">reply</button>
-                            @if(Comment.AuthorId == CurrentUser.Id)
-                            {
-                                <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Editing">edit</button>
-                            }
-                        </Authorized>
-                        <NotAuthorized>
-                            <a href="/login?returnurl=@NavMan.Uri" class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold">reply</a>
-                        </NotAuthorized>
-                    </AuthorizeView>
-                    <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold" @onclick="ShowSource">source</button>
-                    <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold" @onclick="PermaLink">permalink</button>
-                    <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">report</button>
-                </div>
-            </div>
-        </div>
-        @if (_replying)
+<div class="d-flex my-3 border border-1 rounded-1">
+    <details class="p-2 w-100 @_bg bg-gradient" open=@_open>
+        @if(_author != null)
         {
-            <CommentReplyElement CommentAuthor="CurrentUser" ParentComment="Comment" ParentPost="Comment.Post" Cancel="Cancel" />
-        }
-        @if(!HideChildren && _children.Any())
-        {
-            foreach(var c in _children)
+            <summary class="rounded-1 bg-light mb-1 p-1" @onclick="ToggleDetails">
+                <a href="/u/@_author.Username" class="fw-bold text-decoration-none">@_author.Username</a>
+                <span class="fw-bold me-2">@_points @(_points == 1 || _points == -1 ? "point" : "points")</span>
+                @if(!_open && Comment.Points < 1)
+                {
+                    <span class="text-muted fst-italic me-2">comment score below threshold</span>
+                }
+                <span class="text-muted" title="@Comment.DatePosted.ToLocalTime().ToString("ddd MMM dd yyyy HH:mm:ss UTC zzz")">@Utils.FormatTime(Comment.DatePosted)</span>
+                @if(Comment.Edited)
+                {
+                    <span class="text-muted" title="@Comment.DateEdited.ToLocalTime().ToString("ddd MMM dd yyyy HH:mm:ss UTC zzz")">* (last edited @Utils.FormatTime(Comment.DateEdited))</span>
+                }
+                <span class="text-light clearfix float-end">#@Comment.HashId</span>
+            </summary>
+            <div class="d-flex align-top bg-white rounded-1 p-1">
+                <div class="d-inline-flex flex-column">
+                    <div class="align-self-start"><button class="btn btn-link text-decoration-none @(_voteType == VoteType.Up ? "text-primary" : "text-muted")" type="button" @onclick="UpVote"><span class="oi oi-chevron-top"></span></button></div>
+                    <div class="align-self-end"><button class="btn btn-link text-decoration-none @(_voteType == VoteType.Down ? "text-danger" : "text-muted")" type="button" @onclick="DownVote"><span class="oi oi-chevron-bottom"></span></button></div>
+                </div>
+                <div class="w-100 d-inline-flex flex-column ms-3 mt-2">
+                    <div class="d-flex flex-row">
+
+                    @if (_editing)
+                    {
+                            <CommentEditElement Comment="Comment" Cancel="Cancel" CommentAuthor="_author" />
+                    }
+                    else if(_source)
+                    {
+                        <form class="w-100">
+                            <textarea class="form-control" value="@Comment.Content" rows="@_lines" readonly></textarea>
+                            <button type="button" class="btn btn-primary my-3" @onclick="Cancel"><span class="oi oi-circle-x"> </span> Close</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="mb-2">@((MarkupString)Markdig.Markdown.ToHtml(Comment.Content).Replace("<p>", "<p  class=\"mb-1\">"))</span>
+                    }
+                    </div>
+                    <div class="d-inline-flex flex-row">
+                        <AuthorizeView>
+                            <Authorized>
+                                <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Replying">reply</button>
+                                @if(Comment.AuthorId == CurrentUser.Id)
+                                {
+                                    <button class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold" @onclick="Editing">edit</button>
+                                }
+                            </Authorized>
+                            <NotAuthorized>
+                                <a href="/login?returnurl=@NavMan.Uri" class="p-0 me-3 btn btn-link text-decoration-none text-body fw-bold">reply</a>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                        <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold" @onclick="ShowSource">source</button>
+                        <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold" @onclick="PermaLink">permalink</button>
+                        <button class="p-0 me-3 btn btn-link text-decoration-none text-muted fw-bold">report</button>
+                    </div>
+                </div>
+            </div>
+            @if (_replying)
             {
-                <CommentElement Comment="c" OddChild="!OddChild" CollapseLowScore="CollapseLowScore"></CommentElement>
+                <CommentReplyElement CommentAuthor="CurrentUser" ParentComment="Comment" ParentPost="Comment.Post" Cancel="Cancel" />
+            }
+            @if(!HideChildren && _children.Any())
+            {
+                foreach(var c in _children)
+                {
+                    <CommentElement Comment="c" OddChild="!OddChild" CollapseLowScore="CollapseLowScore"></CommentElement>
+                }
             }
         }
-    }
-    else
-    {
-        <summary>
-            Loading...
-        </summary>
-        <p>Loading...</p>
-    }
-</details>
-
+        else
+        {
+            <summary>
+                Loading...
+            </summary>
+            <p>Loading...</p>
+        }
+    </details>
+</div>
 @code {
     [Parameter]
     public Comment Comment { get; set; } = new();
@@ -101,7 +103,7 @@
     User _author = new User { Username = "Loading..." };
     List<Comment> _children = new();
 
-    bool _replying, _editing, _source, _open;
+    bool _replying, _editing, _source, _open, _collapsed;
     int _lines, _points;
     string _bg = string.Empty;
     string _token = string.Empty;
@@ -124,7 +126,15 @@
 
         await FetchCommentData();
 
-        _open = !CollapseLowScore || _points > 0;
+        if(await LocalStorage.ContainKeyAsync(Comment.HashId))
+        {
+            _open = await LocalStorage.GetItemAsync<bool>(Comment.HashId);
+        }
+        else
+        {
+            _open = !CollapseLowScore || _points > 0;
+        }
+        _collapsed = _open;
     }
 
     async Task FetchCommentData()
@@ -245,5 +255,11 @@
         _replying = false;
         _editing = false;
         _source = false;
+    }
+
+    async Task ToggleDetails()
+    {
+        _collapsed = !_collapsed;
+        await LocalStorage.SetItemAsync(Comment.HashId, _collapsed);
     }
 }

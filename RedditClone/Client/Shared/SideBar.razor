@@ -1,0 +1,32 @@
+﻿@inject NavigationManager NavMan
+
+<div class="float-end ms-3 mt-3" style="width: 300px">
+    <form>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control border-secondary" placeholder="Search" aria-label="Search" aria-describedby="button-addon2" @bind-value="_query">
+        <button class="btn btn-outline-secondary" type="submit" id="button-addon2" @onclick="Search"><span class="oi oi-magnifying-glass"></span></button>
+        </div>
+    </form>
+    <button class="btn btn-primary w-100 mb-3 fw-bold">Submit a new post</button>
+    @if(CurrentBoard != null)
+    {
+        <div class="mb-2">
+            <h3><a href="/@CurrentBoard.Name" class="text-dark text-decoration-none fw-bold mb-3">@CurrentBoard.Name</a></h3>
+            <div class="border-bottom border-secondary">@((MarkupString)Markdig.Markdown.ToHtml(CurrentBoard.Description).Replace("<p>", "<p  class=\"mb-1\">"))</div>
+            <p class="text-muted">created by <a href="/u/@CurrentBoard.Owner.Username" class="text-decoration-none">@CurrentBoard.Owner.Username</a> @Utils.FormatTime(CurrentBoard.DateCreated)</p>
+        </div>
+    }
+    <button class="btn btn-primary w-100 mb-3 fw-bold">Start a new board</button>
+</div>
+
+@code {
+    [Parameter]
+    public Board? CurrentBoard { get; set; }
+
+    string _query = string.Empty;
+
+    void Search()
+    {
+        NavMan.NavigateTo($"/search/{_query}");
+    }
+}
