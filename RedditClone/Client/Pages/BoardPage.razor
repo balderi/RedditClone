@@ -19,18 +19,6 @@
             <PostElement Number="++i" Post="p"></PostElement>
         }
     }
-    <AuthorizeView>
-        <Authorized>
-            <button class="my-3 btn btn-primary" @onclick="OnNewPost">@_buttonText</button>
-            @if (_newPost)
-            {
-                <AddPostElement BoardGuid="_board.Guid" />
-            }
-        </Authorized>
-        <NotAuthorized>
-            <p>Please <a href="/login?returnurl=@NavMan.Uri">log in</a> or <a href="/register">register</a> to post.</p>
-        </NotAuthorized>
-    </AuthorizeView>
 }
 else
 {
