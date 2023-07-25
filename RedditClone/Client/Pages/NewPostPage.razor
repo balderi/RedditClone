@@ -66,22 +66,25 @@
     protected override async Task OnInitializedAsync()
     {
         var token = await LocalStorage.GetItemAsync<string>("authToken");
-        var user = await UserService.GetUserByTokenAsync(token);
-        if (user != null)
+        if(!string.IsNullOrEmpty(token))
         {
-            if (user.Success && user.Data != null)
+            var user = await UserService.GetUserByTokenAsync(token);
+            if (user != null)
             {
-                _author = user.Data;
-                _model.AuthorGuid = _author.Guid;
+                if (user.Success && user.Data != null)
+                {
+                    _author = user.Data;
+                    _model.AuthorGuid = _author.Guid;
+                }
+                else
+                {
+                    _message = user.Message;
+                }
             }
             else
             {
-                _message = user.Message;
+                _message = "You need to log in first, buddy...";
             }
-        }
-        else
-        {
-            _message = "You need to log in first, buddy...";
         }
 
         if (!string.IsNullOrEmpty(BoardName))
