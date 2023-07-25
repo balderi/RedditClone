@@ -154,7 +154,7 @@
         {
 
         }
-        else if(_model.BoardName.Length > 1)
+        else if(_model.BoardName.Length > 0)
         {
             var getSuggestions = await BoardService.GetBoardSearchSuggestionsAsync(_model.BoardName);
             if(getSuggestions != null && getSuggestions.Success && getSuggestions.Data != null)

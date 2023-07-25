@@ -85,14 +85,23 @@ namespace RedditClone.Server.Services.BoardService
                 return new ServiceResponse<List<string>> { Success = false, Message = "Empty query" };
             }
 
+            var start = await _context.Boards.Where(b => b.Name.ToLower().StartsWith(queryText)).OrderBy(b => b.Name).ToListAsync();
+            foreach(var item in start)
+            {
+                retval.Add(item.Name);
+            }
+
             var boards = await _context.Boards.Where(b => 
                 b.Name.ToLower().Contains(queryText.ToLower()) || 
                 b.Description.ToLower().Contains(queryText.ToLower())
-            ).ToListAsync();
+            ).OrderBy(b => b.Name).ToListAsync();
 
             foreach(var board in boards)
             {
-                retval.Add(board.Name);
+                if(!retval.Contains(board.Name))
+                {
+                    retval.Add(board.Name);
+                }
             }
 
             return new ServiceResponse<List<string>> { Data = retval };
