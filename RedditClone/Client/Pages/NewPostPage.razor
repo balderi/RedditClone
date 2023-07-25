@@ -135,7 +135,7 @@
             if (result.Success && result.Data != null)
             {
                 _message = "Post added!";
-                NavMan.NavigateTo(NavMan.Uri + _model.BoardName + "/comments/" + result.Data.HashId, true);
+                NavMan.NavigateTo("/b/" + _model.BoardName + "/comments/" + result.Data.HashId, true);
             }
             else
             {

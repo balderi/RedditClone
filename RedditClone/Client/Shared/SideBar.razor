@@ -16,7 +16,7 @@
             <p class="text-muted">created by <a href="/u/@CurrentBoard.Owner.Username" class="text-decoration-none">@CurrentBoard.Owner.Username</a> @Utils.FormatTime(CurrentBoard.DateCreated)</p>
         </div>
     }
-    <button class="btn btn-primary w-100 mb-3 fw-bold">Start a new board</button>
+    <button class="btn btn-primary w-100 mb-3 fw-bold" @onclick="NewBoard">Start a new board</button>
 </div>
 
 @code {
@@ -42,5 +42,10 @@
         {
             NavMan.NavigateTo($"/b/{CurrentBoard.Name}/submit");
         }
+    }
+
+    void NewBoard()
+    {
+        NavMan.NavigateTo("/create-board");
     }
 }
