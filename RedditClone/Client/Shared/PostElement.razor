@@ -26,15 +26,15 @@ else
     <div class="d-flex align-items-center my-3">
         @if(ShowNumber)
         {
-            <div class="d-flex flex-column h-100 m-3"><h3 class="m-0 p-0 text-muted">@Number</h3></div>
+            <div class="d-flex flex-column h-100 m-1 align-items-end" style="width: 2rem;"><h3 class="m-0 p-0 text-muted">@Number</h3></div>
         }
-        <div class="d-inline-flex flex-column mx-3">
-            <div class="fs-6 align-self-center"><button class="btn btn-link m-0 p-0 text-decoration-none @(_voteType == VoteType.Up ? "text-primary" : "text-muted")" type="button" @onclick="UpVote"><span class="oi oi-chevron-top"></span></button></div>
+        <div class="d-inline-flex flex-column ms-3" style="width: 3rem;">
+            <div class="fs-6 fw-bold align-self-center" style="margin-bottom: -0.25rem;"><button class="btn btn-link m-0 p-0 text-decoration-none @(_voteType == VoteType.Up ? "text-primary" : "text-muted")" type="button" @onclick="UpVote"><span class="oi oi-chevron-top"></span></button></div>
             <div class="fs-4 align-self-center text-muted fw-bold">@_points</div>
-            <div class="fs-6"><button class="btn btn-link m-0 p-0 text-decoration-none @(_voteType == VoteType.Down ? "text-danger" : "text-muted")" type="button" @onclick="DownVote"><span class="oi oi-chevron-bottom"></span></button></div>
+            <div class="fs-6 fw-bold align-self-center" style="margin-top: -0.25rem;"><button class="btn btn-link m-0 p-0 text-decoration-none @(_voteType == VoteType.Down ? "text-danger" : "text-muted")" type="button" @onclick="DownVote"><span class="oi oi-chevron-bottom"></span></button></div>
         </div>
         <div class="d-flex flex-column h-100 mx-3 text-muted"><span class="border border-1 border-dark rounded-circle oi @_postType fs-2 p-4"></span></div>
-        <div class="d-flex flex-column h-100 mx-3 flex-fill">
+        <div class="d-flex flex-column h-100 ms-3 flex-fill">
             <div class="d-flex align-top"><a href="@_link" class="fs-4 text-decoration-none">@Post.Title</a> <span class="text-muted ms-2 align-self-center">(@_baseLink)</span> <span class="m-auto ms-2 badge bg-secondary">Tag</span></div>
             <div class="d-flex align-bottom">
                 <div class="d-flex flex-column align-top">
@@ -49,7 +49,7 @@ else
                     <div>
                         @if(Post.Board.Nsfw)
                         {
-                            <span class="me-3 border border-1 border-danger text-danger rounded-3 p-1" style="font-size:smaller">NSFW</span>
+                            <span class="me-2 border border-1 border-danger text-danger rounded-3 p-1" style="font-size:smaller">NSFW</span>
                         }
                         <a href="@_commentLink">@_commentCount @(_commentCount == 1 ? "comment" : "comments")</a>
                     </div>
