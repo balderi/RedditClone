@@ -43,7 +43,7 @@ namespace RedditClone.Server.Controllers
         }
 
         [HttpGet("query/{queryText}")]
-        async Task<ActionResult<ServiceResponse<List<string>>>> GetBoardSearchSuggestionsAsync(string queryText)
+        public async Task<ActionResult<ServiceResponse<List<string>>>> GetBoardSearchSuggestionsAsync(string queryText)
         {
             var response = await _boardService.GetBoardSearchSuggestionsAsync(queryText);
             return Ok(response);

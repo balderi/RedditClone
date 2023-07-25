@@ -7,7 +7,7 @@
         <button class="btn btn-outline-secondary" type="submit" id="button-addon2" @onclick="Search"><span class="oi oi-magnifying-glass"></span></button>
         </div>
     </form>
-    <button class="btn btn-primary w-100 mb-3 fw-bold">Submit a new post</button>
+    <button class="btn btn-primary w-100 mb-3 fw-bold" @onclick="NewPost">Submit a new post</button>
     @if(CurrentBoard != null)
     {
         <div class="mb-2">
@@ -20,6 +20,8 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; } = new();
     [Parameter]
     public Board? CurrentBoard { get; set; }
 
@@ -28,5 +30,17 @@
     void Search()
     {
         NavMan.NavigateTo($"/search/{_query}");
+    }
+
+    void NewPost()
+    {
+        if(CurrentBoard == null)
+        {
+            NavMan.NavigateTo("/submit");
+        }
+        else
+        {
+            NavMan.NavigateTo($"/b/{CurrentBoard.Name}/submit");
+        }
     }
 }

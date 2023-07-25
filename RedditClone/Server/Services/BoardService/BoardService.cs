@@ -80,6 +80,11 @@ namespace RedditClone.Server.Services.BoardService
         {
             var retval = new List<string>();
 
+            if (string.IsNullOrEmpty(queryText))
+            {
+                return new ServiceResponse<List<string>> { Success = false, Message = "Empty query" };
+            }
+
             var boards = await _context.Boards.Where(b => 
                 b.Name.ToLower().Contains(queryText.ToLower()) || 
                 b.Description.ToLower().Contains(queryText.ToLower())

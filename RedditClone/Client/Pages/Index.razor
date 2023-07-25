@@ -6,19 +6,6 @@
 <PageTitle>Index</PageTitle>
 <AllPostsOverview />
 
-<AuthorizeView>
-    <Authorized>
-        <button class="my-3 btn btn-primary" @onclick="OnNewBoard">@_buttonText</button>
-        @if (_newBoard)
-        {
-            <AddBoardElement />
-        }
-    </Authorized>
-    <NotAuthorized>
-        <p>Please <a href="/login?returnurl=@NavMan.Uri">log in</a> or <a href="/register">register</a> to add a board.</p>
-    </NotAuthorized>
-</AuthorizeView>
-
 @code {
     [CascadingParameter]
     public MainLayout Layout { get; set; }

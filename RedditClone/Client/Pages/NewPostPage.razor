@@ -1,31 +1,49 @@
-﻿@inject IPostService PostService
-@inject NavigationManager NavMan
+﻿@inherits BaseElement
 
-@page "/new-post"
+@inject IPostService PostService
+@inject IBoardService BoardService
+@inject IUserService UserService
+@inject NavigationManager NavMan
+@inject ILocalStorageService LocalStorage
+
+@page "/submit"
+@page "/b/{BoardName}/submit"
 
 <h3>Submit a new post</h3>
 
 <AuthorizeView>
     <Authorized>
-        <EditForm Context="post" Model="_model" OnValidSubmit="OnSubmit">
-        <DataAnnotationsValidator />
-        <div class="mb-3">
-            <label for="postTitle" class="form-label">Title</label>
-            <InputText class="form-control" id="postTitle" @bind-Value="_model.Title"></InputText>
-            <ValidationMessage For="() => _model.Title" />
+        <div class="d-flex w-50">
+            <EditForm Context="post" Model="_model" class="w-100" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label for="postTitle" class="form-label d-flex">Title <span class="text-danger">*</span> <span class="ms-auto text-muted">@_model.Title.Length/300</span></label>
+                    <EventInputText class="form-control" id="postTitle" @bind-Value="_model.Title"></EventInputText>
+                    <ValidationMessage For="() => _model.Title" />
+                </div>
+                <div class="mb-3">
+                    <label for="postLink" class="form-label">Link <span class="text-muted">(optional)</span></label>
+                    <InputText class="form-control" id="postLink" @bind-Value="_model.Link"></InputText>
+                </div>
+                <div class="mb-3">
+                    <label for="postContent" class="form-label">Content <span class="text-muted">(optional)</span></label>
+                    <InputTextArea class="form-control" id="postContent" rows="5" @bind-Value="_model.Content"></InputTextArea>
+                </div>
+                <div class="mb-3">
+                    <label for="boardName" class="form-label">Board<span class="text-danger">*</span></label>
+                    <EventInputText class="form-control" id="boardName" @bind-Value="@_model.BoardName" @onkeyup="OnBoardInput" list="boards"></EventInputText>
+                    <datalist id="boards">
+                        @foreach(var suggestion in _suggestions)
+                        {
+                            <option>@suggestion</option>
+                        }
+                    </datalist>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    Submit
+                </button>
+            </EditForm>
         </div>
-        <div class="mb-3">
-            <label for="postLink" class="form-label">Link</label>
-            <InputText class="form-control" id="postLink" @bind-Value="_model.Link"></InputText>
-        </div>
-        <div class="mb-3">
-            <label for="postContent" class="form-label">Content</label>
-            <InputTextArea class="form-control" id="postContent" @bind-Value="_model.Content"></InputTextArea>
-        </div>
-        <button type="submit" class="btn btn-primary">
-            Submit
-        </button>
-    </EditForm>
     <p>@_message</p>
     </Authorized>
     <NotAuthorized >
@@ -34,26 +52,90 @@
 </AuthorizeView>
 
 @code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; } = new();
     [Parameter]
-    public Board? Board { get; set; }
+    public string BoardName { get; set; }
 
     PostNew _model = new PostNew();
+    User? _author;
     string _message = string.Empty;
+    List<string> _suggestions = new();
+    bool _boardNameChanged;
 
     protected override async Task OnInitializedAsync()
     {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        var user = await UserService.GetUserByTokenAsync(token);
+        if (user != null)
+        {
+            if (user.Success && user.Data != null)
+            {
+                _author = user.Data;
+                _model.AuthorGuid = _author.Guid;
+            }
+            else
+            {
+                _message = user.Message;
+            }
+        }
+        else
+        {
+            _message = "You need to log in first, buddy...";
+        }
 
+        if (!string.IsNullOrEmpty(BoardName))
+        {
+            var board = await BoardService.GetBoardByNameAsync(BoardName);
+            if (board == null || !board.Success || board.Data == null)
+            {
+                _message = "The board '{_model.BoardName}' does not exist.";
+                return;
+            }
+
+            Layout.CurrentBoard = board.Data;
+
+            _model.BoardGuid = board.Data.Guid;
+            _model.BoardName = board.Data.Name;
+        }
+
+        else if (!string.IsNullOrEmpty(_model.BoardName))
+        {
+            var board = await BoardService.GetBoardByNameAsync(_model.BoardName);
+            if (board == null || !board.Success || board.Data == null)
+            {
+                _message = "The board '{_model.BoardName}' does not exist.";
+                return;
+            }
+
+            Layout.CurrentBoard = board.Data;
+
+            _model.BoardGuid = board.Data.Guid;
+            _model.BoardName = board.Data.Name;
+        }
     }
 
     async Task OnSubmit()
     {
+        if (_boardNameChanged)
+        {
+            var board = await BoardService.GetBoardByNameAsync(_model.BoardName);
+            if (board == null || !board.Success || board.Data == null)
+            {
+                _message = "The board '{_model.BoardName}' does not exist.";
+                return;
+            }
+
+            _model.BoardGuid = board.Data.Guid;
+        }
+
         var result = await PostService.AddPostAsync(_model);
         if (result != null)
         {
             if (result.Success && result.Data != null)
             {
                 _message = "Post added!";
-                NavMan.NavigateTo(NavMan.Uri + "/comments/" + result.Data.HashId, true);
+                NavMan.NavigateTo(NavMan.Uri + _model.BoardName + "/comments/" + result.Data.HashId, true);
             }
             else
             {
@@ -64,5 +146,22 @@
         {
             _message = "API call failed";
         }
+    }
+
+    async Task OnBoardInput(KeyboardEventArgs args)
+    {
+        if(args.Key == null)
+        {
+
+        }
+        else if(_model.BoardName.Length > 1)
+        {
+            var getSuggestions = await BoardService.GetBoardSearchSuggestionsAsync(_model.BoardName);
+            if(getSuggestions != null && getSuggestions.Success && getSuggestions.Data != null)
+            {
+                _suggestions = getSuggestions.Data;
+            }
+        }
+        _boardNameChanged = true;
     }
 }

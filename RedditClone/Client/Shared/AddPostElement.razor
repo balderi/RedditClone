@@ -38,7 +38,7 @@ else
     [Parameter]
     public Guid BoardGuid { get; set; }
     PostNew _model = new();
-    User _user;
+    User? _user;
     string _message = string.Empty;
 
     protected override async Task OnInitializedAsync()

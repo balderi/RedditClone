@@ -36,6 +36,10 @@
         public async Task<ServiceResponse<List<string>>> GetBoardSearchSuggestionsAsync(string queryText)
         {
             var result = await _http.GetFromJsonAsync<ServiceResponse<List<string>>>($"api/board/query/{queryText}");
+            if(result == null || !result.Success || result.Data == null)
+            {
+                return new ServiceResponse<List<string>> { Success = false, Message = "Something happened." };
+            }
             return result;
         }
     }
