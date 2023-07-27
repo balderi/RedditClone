@@ -12,6 +12,14 @@
         <div class="d-flex w-50">
             <EditForm Context="board" Model="_model" class="w-100" OnValidSubmit="OnSubmit">
                 <DataAnnotationsValidator />
+                @if(_user != null)
+                {
+                    <p class="text-muted text-decoration-none">as <a href="/u/@_user.Username">@_user.Username</a></p>
+                }
+                else
+                {
+                    <p class="text-muted text-decoration-none">Loading user...</p>
+                }
                 <div class="mb-3">
                     <label for="boardName" class="form-label d-flex">Name <span class="text-danger">*</span> <span class="ms-auto text-muted">@(_model.Name.Length - 3)/32</span></label>
                     <EventInputText class="form-control" id="boardName" @bind-Value="_model.Name"></EventInputText>

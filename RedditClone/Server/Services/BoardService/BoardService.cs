@@ -5,18 +5,16 @@ namespace RedditClone.Server.Services.BoardService
     public class BoardService : IBoardService
     {
         private readonly DataContext _context;
-        private readonly IUserService _userService;
 
-        public BoardService(DataContext context, IUserService userService)
+        public BoardService(DataContext context)
         {
             _context = context;
-            _userService = userService;
         }
 
         public async Task<ServiceResponse<Board>> AddBoardAsync(BoardNew board)
         {
             var response = new ServiceResponse<Board>();
-            Regex regex = new Regex("^([a-zA-Z0-9])+$");
+            Regex regex = new Regex("^([a-zA-Z0-9_])+$");
             if (!regex.IsMatch(board.Name))
             {
                 response.Success = false;
