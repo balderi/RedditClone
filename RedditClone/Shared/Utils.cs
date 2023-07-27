@@ -2,6 +2,17 @@
 {
     public static class Utils
     {
+        static Random _random = new Random();
+
+        public static int FuzzVote(int vote)
+        {
+            var fuzzPercentage = 10;
+            var v = (double)vote;
+            var r = (double)(100 - _random.Next(-fuzzPercentage, fuzzPercentage)) / 100;
+            v *= r;
+            return (int)Math.Round(v);
+        }
+
         public static string FormatTime(DateTime dt)
         {
             var span = DateTime.UtcNow.Subtract(dt);

@@ -19,6 +19,7 @@ namespace RedditClone.Shared.Models
         public int VotesUp { get; set; }
         public int VotesDown { get; set; }
         public int Points => VotesUp - VotesDown;
+        public int FuzzyPoints => Utils.FuzzVote(Points);
 
         public override string ToString()
         {

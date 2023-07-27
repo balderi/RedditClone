@@ -260,7 +260,7 @@ else
                 if (getComments != null && getComments.Success && getComments.Data != null)
                 {
                     _topComments = getComments.Data;
-                    _topComments = _topComments.OrderByDescending(c => c.Points).ToList();
+                    _topComments = _topComments.OrderByDescending(c => c.FuzzyPoints).ToList();
                 }
             }
 
@@ -270,7 +270,7 @@ else
                 _commentCount = getCount.Data;
             }
 
-            _points = _post.Points;
+            _points = _post.FuzzyPoints;
         }
         else
         {

@@ -34,6 +34,6 @@ else
             return;
         }
 
-        _posts = posts.Data.OrderByDescending(p => p.Points).Take(10).ToList();
+        _posts = posts.Data.OrderByDescending(p => p.FuzzyPoints).Take(10).ToList();
     }
 }
