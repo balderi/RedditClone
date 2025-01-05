@@ -16,6 +16,7 @@
                 </span>
                 <AuthorizeView>
                     <Authorized>
+                        <span class="alert alert-warning border-1 border-warning p-1 mt-3"><span class="oi oi-bug me-1"></span>@_debugValue</span>
                         <a href="/profile" class="btn btn-primary"><span class="oi oi-person me-1"> </span> @context.User.Identity.Name</a>
                         <button class="btn btn-outline-danger mx-3" @onclick="Logout">Logout</button>
                     </Authorized>
@@ -39,6 +40,8 @@
 
 
 @code {
+    private string _debugValue = "empty debug value";
+
     private Board? _currentBoard;
 
     public Board? CurrentBoard
@@ -49,6 +52,12 @@
             _currentBoard = value;
             InvokeAsync(() => StateHasChanged());
         }
+    }
+
+    public void SetDebugString(string text)
+    {
+        _debugValue = text;
+        InvokeAsync(() => StateHasChanged());
     }
 
     private async Task Logout()

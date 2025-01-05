@@ -9,6 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedditClone.Client", "Reddi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedditClone.Shared", "RedditClone\Shared\RedditClone.Shared.csproj", "{C9A5A229-8630-4839-8E59-DBE34AC7D46A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{285EA77B-47A9-4196-9B41-5125F22E1570}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		buildnpush.ps1 = buildnpush.ps1
+		Dockerfile = Dockerfile
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

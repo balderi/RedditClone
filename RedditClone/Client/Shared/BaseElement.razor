@@ -17,6 +17,10 @@
                     CurrentUser = user.Data;
                 }
             }
+            else
+            {
+                throw new InvalidOperationException("user is null");
+            }
         }
     }
 }

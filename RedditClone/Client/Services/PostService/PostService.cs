@@ -19,7 +19,7 @@
         {
             var edit = new PostEdit { PostId = postId, UserToken = token, NewContent = newContent };
 
-            var result = await _http.PutAsJsonAsync("api/post", edit);
+            var result = await _http.PutAsJsonAsync("api/post/edit", edit);
             return await result.Content.ReadFromJsonAsync<ServiceResponse<Post>>();
         }
 

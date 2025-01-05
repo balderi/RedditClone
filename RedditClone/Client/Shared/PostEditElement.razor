@@ -3,13 +3,11 @@
 @inject IPostService PostService
 
 <EditForm Model="_model" OnValidSubmit="OnSubmit" class="w-100 mt-3 border border-1 border-secondary rounded-3">
-    <DataAnnotationsValidator />
     <div class="m-3">
         <InputTextArea rows="@_lines" class="form-control" id="content" @bind-Value="_model.Content" />
     </div>
     <button class="btn btn-primary ms-3 mb-3" type="submit"><span class="oi oi-circle-check"> </span> Save</button>
     <button class="btn btn-primary ms-3 mb-3" @onclick="OnCancel"><span class="oi oi-circle-x"> </span> Cancel</button>
-    <ValidationMessage For="() => _model.Content" />
 </EditForm>
 <p>@_message</p>
 

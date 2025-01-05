@@ -101,6 +101,7 @@
     public bool CollapseLowScore { get; set; }
 
     User _author = new User { Username = "Loading..." };
+    User _user = new();
     List<Comment> _children = new();
 
     bool _replying, _editing, _source, _open, _collapsed;
@@ -120,6 +121,19 @@
         }
 
         _token = await LocalStorage.GetItemAsync<string>("authToken");
+        if (!string.IsNullOrEmpty(_token))
+        {
+            var user = await UserService.GetUserByTokenAsync(_token);
+            if (user != null)
+            {
+                if (user.Success && user.Data != null)
+                {
+                    _user = user.Data;
+                    CurrentUser = _user;
+                }
+            }
+        }
+
         _lines = Comment.Content.Count(c => c.Equals('\n')) + 1;
 
         _bg = OddChild ? "bg-secondary bg-opacity-10 border-secondary" : "bg-white bg-opacity-100 border-primary";

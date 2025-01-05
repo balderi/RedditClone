@@ -135,7 +135,7 @@
 
     <AuthorizeView>
         <Authorized>
-            <PostReplyElement ParentPost="_post" CommentAuthor="CurrentUser" />
+            <PostReplyElement ParentPost="_post" CommentAuthor="_user" />
         </Authorized>
         <NotAuthorized>
             <p>Please <a href="/login?returnurl=@NavMan.Uri">log in</a> or <a href="/register">register</a> to comment.</p>
@@ -162,6 +162,8 @@ else
 {
     <h3>The post <span class="font-monospace">@PostHash</span> does not exist...</h3>
 }
+
+<span class="alert alert-warning border-1 border-warning p-1 mt-3"><span class="oi oi-bug me-1"></span>text</span>
 
 @code {
     [CascadingParameter]
@@ -212,6 +214,8 @@ else
                 if (user.Success && user.Data != null)
                 {
                     _user = user.Data;
+                    CurrentUser = _user;
+                    Layout.SetDebugString($"GUID: CurrentUser: {CurrentUser.Guid} - _user: {_user.Guid}");
                 }
             }
         }

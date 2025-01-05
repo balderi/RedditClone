@@ -11,7 +11,7 @@
 }
 else if (!_posts.Any())
 {
-    
+    <p>There's nothing here :(</p>
 }
 else
 {
@@ -31,6 +31,7 @@ else
 
         if(posts == null || !posts.Success || posts.Data == null)
         {
+            _posts = new();
             return;
         }
 
